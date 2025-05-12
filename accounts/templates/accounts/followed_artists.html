@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Followed Artists{% endblock %}
+
+{% block content %}
+<div class="followed-artists-outer" style="padding: 3rem 0;">
+  <div class="followed-artists-center" style="max-width: 700px; margin: 0 auto;">
+    <div class="followed-artists-card" style="border-radius: 1.5rem; background: #232323; color: #fff; box-shadow: 0 4px 24px 0 #1db95422, 0 2px 8px #00000022;">
+      <div class="followed-artists-card-body" style="padding: 3rem;">
+        <div class="followed-artists-header" style="display: flex; align-items: center; margin-bottom: 2rem;">
+          <i class="fas fa-users" style="font-size: 2.5rem; color: #1db954;"></i>
+          <h2 style="font-weight: 900; margin-left: 1.2rem; margin-bottom: 0;">Followed Artists</h2>
+        </div>
+        <hr style="border: none; border-top: 1px solid #1db95433; margin-bottom: 2rem;">
+        {% if followed_artists %}
+          <div class="followed-artists-list" style="display: flex; flex-wrap: wrap; gap: 2rem;">
+            {% for artist in followed_artists %}
+              <div class="artist-card" style="flex: 1 1 260px; min-width: 240px; max-width: 320px; background: #181818; border-radius: 1rem; display: flex; align-items: center; padding: 1.2rem;">
+                {% if artist.image %}
+                  <img src="{{ artist.image.url }}" alt="{{ artist.name }}" class="artist-img" style="width: 64px; height: 64px; object-fit: cover; border-radius: 50%; border: 2px solid #1db954; margin-right: 1.2rem;">
+                {% else %}
+                  <span class="artist-img-placeholder" style="width: 64px; height: 64px; background: #232323; border-radius: 50%; border: 2px solid #1db954; display: flex; align-items: center; justify-content: center; margin-right: 1.2rem;">
+                    <i class="fas fa-user-circle" style="font-size: 2.5rem; color: #1db954;"></i>
+                  </span>
+                {% endif %}
+                <div style="flex: 1;">
+                  <h5 style="font-weight: 700; margin-bottom: 0.3rem;">
+                    <a href="{% url 'music:artist_detail' artist.pk %}" style="color: inherit; text-decoration: none;">
+                      {{ artist.name }}
+                      {% if artist.is_verified %}
+                        <span title="Verified Artist" style="color:#1db954;"><i class="fas fa-check-circle" style="margin-left: 0.3em;"></i></span>
+                      {% endif %}
+                    </a>
+                  </h5>
+                  {% if artist.genre %}
+                    <div style="color: #b3b3b3; font-size: 0.98rem; margin-bottom: 0.3rem;">
+                      <i class="fas fa-music" style="margin-right: 0.4em;"></i>{{ artist.genre.name }}
+                    </div>
+                  {% endif %}
+                  {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'music:unfollow_artist' artist.pk %}" style="display:inline;">
+                      {% csrf_token %}
+                      <button type="submit" style="display: inline-flex; align-items: center; background: transparent; color: #ff4d4f; border: 1.5px solid #ff4d4f; border-radius: 1rem; padding: 0.3em 1em; font-size: 0.98rem; font-weight: 600; cursor: pointer; transition: background 0.15s, color 0.15s;">
+                        <i class="fas fa-user-minus" style="margin-right: 0.5em;"></i>Unfollow
+                      </button>
+                    </form>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty-alert-detail" style="background: #232323; color: #1db954; border: none; border-radius: 1.2rem; font-size: 1.15rem; font-weight: 600; box-shadow: 0 2px 8px 0 #1db95422; margin-top: 2rem; text-align: center; padding: 2.5rem 1rem;">
+            <i class="fa fa-info-circle" style="margin-right: 0.7em;"></i> You are not following any artists yet.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% include 'inc/is_paginated.html' %}
+{% endblock %}

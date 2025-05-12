@@ -1,0 +1,80 @@
+<style>
+  .spotify-message {
+    border-radius: 1.2rem;
+    font-family: 'Circular Std', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 1.08rem;
+    font-weight: 500;
+    margin: 1.2rem auto 0 auto;
+    max-width: 540px;
+    box-shadow: 0 2px 16px 0 #1db95422;
+    padding: 1.1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: #232323;
+    color: #fff;
+    border: none;
+    position: relative;
+    z-index: 1000;
+    animation: spotify-fadein 0.7s;
+  }
+  .spotify-message-success {
+    background: linear-gradient(90deg, #1db954 60%, #232323 100%);
+    color: #181818;
+    border-left: 6px solid #1db954;
+  }
+  .spotify-message-info {
+    background: linear-gradient(90deg, #232323 80%, #1db954 100%);
+    color: #1db954;
+    border-left: 6px solid #1db954;
+  }
+  .spotify-message-warning {
+    background: linear-gradient(90deg, #fbbf24 60%, #232323 100%);
+    color: #181818;
+    border-left: 6px solid #fbbf24;
+  }
+  .spotify-message-error {
+    background: linear-gradient(90deg, #ef4444 60%, #232323 100%);
+    color: #fff;
+    border-left: 6px solid #ef4444;
+  }
+  .spotify-message i {
+    font-size: 1.4rem;
+    margin-right: 0.5rem;
+    min-width: 1.4rem;
+    text-align: center;
+  }
+  @keyframes spotify-fadein {
+    from { opacity: 0; transform: translateY(-16px);}
+    to { opacity: 1; transform: translateY(0);}
+  }
+</style>
+{% if messages %}
+  <div class="spotify-messages-container" style="position: fixed; top: 1.5rem; left: 0; right: 0; z-index: 1050; pointer-events: none;">
+    {% for message in messages %}
+      <div
+        class="spotify-message
+          {% if message.tags == 'success' %}spotify-message-success{% endif %}
+          {% if message.tags == 'info' %}spotify-message-info{% endif %}
+          {% if message.tags == 'warning' %}spotify-message-warning{% endif %}
+          {% if message.tags == 'error' or message.tags == 'danger' %}spotify-message-error{% endif %}
+        "
+        role="alert"
+        style="pointer-events: auto;"
+      >
+        {% if message.tags == 'success' %}
+          <i class="fas fa-check-circle"></i>
+        {% elif message.tags == 'info' %}
+          <i class="fas fa-info-circle"></i>
+        {% elif message.tags == 'warning' %}
+          <i class="fas fa-exclamation-triangle"></i>
+        {% elif message.tags == 'error' or message.tags == 'danger' %}
+          <i class="fas fa-times-circle"></i>
+        {% else %}
+          <i class="fas fa-comment-alt"></i>
+        {% endif %}
+        <span>{{ message }}</span>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}

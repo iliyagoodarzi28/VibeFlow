@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Comment{% endblock %}
+
+{% block content %}
+
+<div style="background: linear-gradient(120deg, #181818 70%, #1db954 100%); min-height: 100vh; padding: 3rem 0;">
+  <div style="max-width: 500px; margin: 0 auto;">
+    <div style="background: #232323; border-radius: 1.5rem; box-shadow: 0 4px 24px 0 #1db95422, 0 2px 8px #00000022; padding: 2.5rem 2rem;">
+      <div style="margin-bottom: 2rem;">
+        <h2 style="color: #1db954; font-weight: 900; font-size: 2rem; margin-bottom: 0;">
+          <i class="fas fa-edit" style="margin-right: 0.7em;"></i>Edit Comment
+        </h2>
+      </div>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% for field in form %}
+          <div style="margin-bottom: 1.5rem;">
+            <label for="{{ field.id_for_label }}" style="display: block; color: #fff; font-weight: 600; margin-bottom: 0.5em;">
+              {{ field.label }}
+            </label>
+            {{ field }}
+            {% if field.help_text %}
+              <div style="color: #b3b3b3; font-size: 0.97em; margin-top: 0.3em;">{{ field.help_text }}</div>
+            {% endif %}
+            {% for error in field.errors %}
+              <div style="color: #ff4d4f; font-size: 0.97em; margin-top: 0.3em;">{{ error }}</div>
+            {% endfor %}
+          </div>
+        {% endfor %}
+        <div style="display: flex; gap: 1em; align-items: center; margin-top: 2rem;">
+          <button type="submit" style="background: #1db954; color: #fff; border: none; border-radius: 2em; padding: 0.6em 1.7em; font-size: 1.1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center;">
+            <i class="fas fa-save" style="margin-right: 0.7em;"></i>Save Changes
+          </button>
+          <a href="{% url 'music:song_detail' object.song.pk %}" style="background: #232323; color: #1db954; border: 2px solid #1db954; border-radius: 2em; padding: 0.6em 1.7em; font-size: 1.1rem; font-weight: 700; text-decoration: none; display: flex; align-items: center;">
+            <i class="fas fa-arrow-left" style="margin-right: 0.7em;"></i>Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

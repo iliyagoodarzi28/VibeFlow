@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Artists{% endblock %}
+
+{% block content %}
+<div style="background: linear-gradient(120deg, #181818 70%, #1db954 100%); min-height: 100vh; padding: 3rem 0;">
+  <div style="max-width: 1200px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; margin-top: 2rem;">
+      <h1 style="font-size: 2.3rem; font-weight: 900; color: #1db954; margin: 0;">
+        <i class="fas fa-users" style="margin-right: 0.7em; color: #1db954;"></i>Artists
+      </h1>
+      <a href="{% url 'music:song_list' %}" style="display: inline-block; background: #1db954; color: #fff; border-radius: 2em; padding: 0.7em 2.2em; font-size: 1.15rem; font-weight: 700; box-shadow: 0 2px 8px 0 #1db95422; text-decoration: none;">
+        <i class="fas fa-music" style="margin-right: 0.7em;"></i>Songs
+      </a>
+    </div>
+    <p style="font-size: 1.2rem; color: #b3b3b3; text-align: center; margin-bottom: 2.5rem;">
+      Discover the talented artists in our collection.
+    </p>
+    {% if artists %}
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 2rem;">
+        {% for artist in artists %}
+          <div style="background: #232323; border-radius: 1.2rem; box-shadow: 0 4px 24px 0 #1db95422, 0 2px 8px #00000022; display: flex; flex-direction: column; height: 100%; position: relative; overflow: hidden;">
+            {% if artist.image %}
+              <div style="width: 100%; aspect-ratio: 1/1; background: #181818; border-top-left-radius: 1.2rem; border-top-right-radius: 1.2rem; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                <img src="{{ artist.image.url }}" alt="{{ artist.name }} image" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+              </div>
+            {% else %}
+              <div style="width: 100%; aspect-ratio: 1/1; background: #181818; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: #1db954; border-top-left-radius: 1.2rem; border-top-right-radius: 1.2rem;">
+                <i class="fas fa-user-circle"></i>
+              </div>
+            {% endif %}
+            <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 1.5rem 1.2rem;">
+              <h4 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 0.7rem; color: #fff; text-align: center;">
+                <a href="{% url 'music:artist_detail' artist.pk %}" style="color: #fff; text-decoration: none; position: relative;">
+                  {{ artist.name|default:"(No Name)" }}
+                  {% if artist.is_verified %}
+                    <span title="Verified Artist" style="color: #1db954; margin-left: 0.4em;"><i class="fas fa-check-circle"></i></span>
+                  {% endif %}
+                </a>
+              </h4>
+              <div style="color: #b3b3b3; text-align: center; margin-bottom: 0.7rem; font-size: 1.05rem;">
+                <i class="fas fa-users" style="margin-right: 0.4em; color: #1db954;"></i>
+                {{ artist.followers.count }} follower{{ artist.followers.count|pluralize }}
+              </div>
+              {% if artist.bio %}
+                <p style="color: #b3b3b3; font-size: 1rem; margin-bottom: 0;">
+                  {{ artist.bio|truncatewords:10 }}
+                </p>
+              {% else %}
+                <p style="color: #b3b3b3; font-size: 1rem; margin-bottom: 0;">
+                  <em>No bio available.</em>
+                </p>
+              {% endif %}
+            </div>
+            <div style="text-align: center; padding-bottom: 1.2rem;">
+              <a href="{% url 'music:artist_detail' artist.pk %}" style="display: inline-block; border: 2px solid #1db954; color: #1db954; border-radius: 2em; padding: 0.5em 1.5em; font-size: 1.05rem; font-weight: 700; text-decoration: none; margin-top: 0.7em; background: transparent; transition: background 0.15s;">
+                <i class="fas fa-info-circle" style="margin-right: 0.4em;"></i>View Profile
+              </a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div style="background: #232323; color: #1db954; border: none; border-radius: 1.2rem; font-size: 1.15rem; font-weight: 600; box-shadow: 0 2px 8px 0 #1db95422; text-align: center; margin-top: 4rem; padding: 1.5rem;">
+        <i class="fas fa-info-circle" style="margin-right: 0.7em;"></i> No artists are available.
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% include 'inc/is_paginated.html' %}
+
+{% endblock %}

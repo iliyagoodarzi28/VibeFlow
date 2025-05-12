@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+{% block title %}{{ album.title }} - {{ album.artist }}{% endblock %}
+
+{% block content %}
+<div style="background: linear-gradient(120deg, #181818 70%, #1db954 100%); min-height: 100vh; padding: 3rem 0;">
+  <div style="max-width: 700px; margin: 0 auto;">
+    <div style="background: #232323; border-radius: 1.5rem; overflow: hidden; box-shadow: 0 4px 24px 0 #1db95422, 0 2px 8px #00000022;">
+      <div style="background: linear-gradient(120deg, #181818 70%, #1db954 100%); padding: 2.5rem 2rem; display: flex; flex-direction: column; align-items: center;">
+        {% if album.cover %}
+          <img src="{{ album.cover.url }}" alt="{{ album.title }} cover" style="height: 220px; width: 220px; object-fit: cover; background: #232323; border-radius: 1rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px 0 #1db95422;">
+        {% else %}
+          <div style="height: 220px; width: 220px; background: #232323; font-size: 4rem; color: #1db954; border-radius: 1rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px 0 #1db95422;">
+            <i class="fas fa-compact-disc"></i>
+          </div>
+        {% endif %}
+        <h1 style="font-size: 2.5rem; color: #1db954; text-shadow: 0 2px 24px #1db95444, 0 1px 0 #181818; font-weight: 900; text-align: center; margin-bottom: 0.7rem;">
+          <i class="fas fa-compact-disc" style="margin-right: 0.5em; color: #1db954;"></i>{{ album.title }}
+        </h1>
+        <div style="text-align: center; margin-bottom: 0.7rem;">
+          <span style="font-size: 1.15rem;">
+            <i class="fas fa-user" style="margin-right: 0.4em; color: #1db954;"></i>
+            <a href="{% url 'music:artist_detail' album.artist.pk %}" style="color: #fff; text-decoration: none; font-weight: 600;">
+              {{ album.artist }}
+            </a>
+          </span>
+        </div>
+        <div style="text-align: center; color: #b3b3b3; margin-bottom: 0.7rem; font-size: 1.05rem;">
+          <i class="fas fa-calendar-alt" style="margin-right: 0.4em; color: #1db954;"></i>
+          Released: <span style="color: #fff; font-weight: 600;">{{ album.release_date|date:"F d, Y" }}</span>
+        </div>
+        {% if album.genres.all %}
+          <div style="margin-bottom: 0.7rem;">
+            {% for genre in album.genres.all %}
+              <span style="background: #1db954; color: #181818; font-weight: 700; font-size: 1rem; border-radius: 1rem; padding: 0.4em 1em; letter-spacing: -0.5px; margin-bottom: 0.1rem; margin-right: 0.4em; box-shadow: 0 1px 4px 0 #1db95422; display: inline-block;">
+                {{ genre }}
+              </span>
+            {% endfor %}
+          </div>
+        {% endif %}
+        {% if album.rating %}
+          <div style="margin-top: 0.7rem;">
+            <span style="background: #ffe066; color: #181818; font-size: 1.05rem; font-weight: 700; border-radius: 1rem; padding: 0.4em 1em; letter-spacing: -0.5px; box-shadow: 0 1px 4px 0 #1db95422; display: inline-flex; align-items: center; gap: 0.3em;">
+              <i class="fas fa-star" style="margin-right: 0.4em; color: #ffc107;"></i>{{ album.rating|floatformat:1 }}/5
+            </span>
+          </div>
+        {% endif %}
+      </div>
+      <div style="height: 4px; background: linear-gradient(90deg, #1db954 0%, #181818 100%); opacity: 0.7;"></div>
+      <div style="background: #181818; padding: 2rem 2rem;">
+        <h3 style="color: #1db954; font-size: 2rem; letter-spacing: -1px; font-weight: 900; text-align: center; margin-bottom: 1.5rem;">
+          <i class="fas fa-music" style="margin-right: 0.5em;"></i>Songs in this Album
+        </h3>
+        
+        <div id="album-player-controls" style="display: flex; align-items: center; gap: 1.2rem; margin: 2rem auto 0 auto; justify-content: center;">
+          <button id="album-prev-btn" title="Previous" style="background: #232323; color: #1db954; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.3rem; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+            <i class="fas fa-backward"></i>
+          </button>
+          <button id="album-play-btn" title="Play" style="background: #1db954; color: #fff; border: none; border-radius: 50%; width: 48px; height: 48px; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+            <i class="fas fa-play"></i>
+          </button>
+          <button id="album-stop-btn" title="Stop" style="background: #232323; color: #1db954; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.3rem; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+            <i class="fas fa-stop"></i>
+          </button>
+          <button id="album-next-btn" title="Next" style="background: #232323; color: #1db954; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.3rem; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+            <i class="fas fa-forward"></i>
+          </button>
+          <button id="album-random-btn" title="Random" style="background: #232323; color: #1db954; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.3rem; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+            <i class="fas fa-random"></i>
+          </button>
+        </div>
+        <audio id="album-audio-player" style="display:none;"></audio>
+        <br>
+        {% if songs %}
+          {# Sort the songs alphabetically by title before displaying #}
+          {% with sorted_songs=songs|dictsort:"title" %}
+          <ul style="list-style: none; padding: 0; margin: 0;">
+            {% for song in sorted_songs %}
+              <li style="display: flex; align-items: center; justify-content: space-between; background: transparent; border: none; border-bottom: 1px solid #232323; padding: 1rem 0;">
+                <div style="display: flex; align-items: center;">
+                  <span style="color: #1db954; font-size: 1.2rem; margin-right: 1em;"><i class="fas fa-music"></i></span>
+                  <a href="{% url 'music:song_detail' song.pk %}" style="color: #fff; font-size: 1.08rem; font-weight: 600; text-decoration: none;">
+                    {{ song.title }}
+                  </a>
+                  {% if song.artist != album.artist %}
+                    <span style="color: #b3b3b3; margin-left: 0.7em; font-size: 0.98rem;">(feat. {{ song.artist }})</span>
+                  {% endif %}
+                  {% if song.audio_file %}
+                    <button class="play-stop-song-btn" data-audio-url="{{ song.audio_file.url }}" data-state="stopped" title="Play Song" style="margin-left: 1em; background: #1db954; color: #fff; border: none; border-radius: 2rem; font-size: 1.05rem; font-weight: 700; padding: 0.3em 1em; cursor: pointer; transition: background 0.15s;">
+                      <i class="fas fa-play"></i>
+                    </button>
+                  {% endif %}
+                </div>
+                {% if song.duration %}
+                  <span style="background: #232323; color: #1db954; font-size: 1.01rem; font-weight: 600; border-radius: 1rem; padding: 0.4em 1em;">
+                    {{ song.duration|time:"i:s" }}
+                  </span>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+          {% endwith %}
+          <audio id="audio-player-detail" style="display:none;"></audio>
+          <script>
+            document.addEventListener('DOMContentLoaded', function() {
+              const audioPlayer = document.getElementById('audio-player-detail');
+              const playBtns = Array.from(document.querySelectorAll('.play-stop-song-btn'));
+              let lastBtn = null;
+              let currentIndex = -1;
+              let playAllMode = false;
+
+              // Play/Stop button logic
+              playBtns.forEach(function(btn, idx) {
+                btn.addEventListener('click', function(e) {
+                  e.preventDefault();
+                  playAllMode = false;
+                  const audioUrl = btn.getAttribute('data-audio-url');
+                  const isPlaying = btn.getAttribute('data-state') === 'playing';
+
+                  // If this button is already playing, stop it
+                  if (isPlaying) {
+                    audioPlayer.pause();
+                    audioPlayer.currentTime = 0;
+                    btn.innerHTML = '<i class="fas fa-play"></i>';
+                    btn.setAttribute('data-state', 'stopped');
+                    lastBtn = null;
+                    currentIndex = -1;
+                  } else {
+                    // Play this song
+                    if (audioPlayer.src !== audioUrl) {
+                      audioPlayer.src = audioUrl;
+                    }
+                    audioPlayer.play();
+                    btn.innerHTML = '<i class="fas fa-stop"></i>';
+                    btn.setAttribute('data-state', 'playing');
+                    // Reset any other play/stop buttons
+                    playBtns.forEach(function(otherBtn, otherIdx) {
+                      if (otherBtn !== btn) {
+                        otherBtn.innerHTML = '<i class="fas fa-play"></i>';
+                        otherBtn.setAttribute('data-state', 'stopped');
+                      }
+                    });
+                    lastBtn = btn;
+                    currentIndex = idx;
+                  }
+                });
+              });
+
+              // Helper to update play/stop icons
+              function updatePlayIcons(idxToPlay) {
+                playBtns.forEach(function(btn, idx) {
+                  if (idx === idxToPlay) {
+                    btn.innerHTML = '<i class="fas fa-stop"></i>';
+                    btn.setAttribute('data-state', 'playing');
+                  } else {
+                    btn.innerHTML = '<i class="fas fa-play"></i>';
+                    btn.setAttribute('data-state', 'stopped');
+                  }
+                });
+                lastBtn = playBtns[idxToPlay];
+              }
+
+              // Album player controls
+              const prevBtn = document.getElementById('album-prev-btn');
+              const playBtn = document.getElementById('album-play-btn');
+              const stopBtn = document.getElementById('album-stop-btn');
+              const nextBtn = document.getElementById('album-next-btn');
+              const randomBtn = document.getElementById('album-random-btn');
+
+              if (prevBtn) {
+                prevBtn.addEventListener('click', function() {
+                  playAllMode = false;
+                  if (playBtns.length === 0) return;
+                  if (currentIndex === -1) currentIndex = 0;
+                  currentIndex = (currentIndex - 1 + playBtns.length) % playBtns.length;
+                  playBtns[currentIndex].click();
+                });
+              }
+
+              if (nextBtn) {
+                nextBtn.addEventListener('click', function() {
+                  playAllMode = false;
+                  if (playBtns.length === 0) return;
+                  if (currentIndex === -1) currentIndex = 0;
+                  currentIndex = (currentIndex + 1) % playBtns.length;
+                  playBtns[currentIndex].click();
+                });
+              }
+
+              if (randomBtn) {
+                randomBtn.addEventListener('click', function() {
+                  playAllMode = false;
+                  if (playBtns.length === 0) return;
+                  let randomIdx = Math.floor(Math.random() * playBtns.length);
+                  // Avoid playing the same song again if possible
+                  if (playBtns.length > 1 && randomIdx === currentIndex) {
+                    randomIdx = (randomIdx + 1) % playBtns.length;
+                  }
+                  currentIndex = randomIdx;
+                  playBtns[currentIndex].click();
+                });
+              }
+
+              if (stopBtn) {
+                stopBtn.addEventListener('click', function() {
+                  playAllMode = false;
+                  audioPlayer.pause();
+                  audioPlayer.currentTime = 0;
+                  playBtns.forEach(function(btn) {
+                    btn.innerHTML = '<i class="fas fa-play"></i>';
+                    btn.setAttribute('data-state', 'stopped');
+                  });
+                  lastBtn = null;
+                  currentIndex = -1;
+                });
+              }
+
+              if (playBtn) {
+                playBtn.addEventListener('click', function() {
+                  if (playBtns.length === 0) return;
+                  playAllMode = true;
+                  currentIndex = 0;
+                  playBtns[currentIndex].click();
+                });
+              }
+
+              // When song ends, reset play/stop icon or play next if in playAllMode
+              audioPlayer.addEventListener('ended', function() {
+                if (lastBtn) {
+                  lastBtn.innerHTML = '<i class="fas fa-play"></i>';
+                  lastBtn.setAttribute('data-state', 'stopped');
+                }
+                if (playAllMode && playBtns.length > 0) {
+                  currentIndex = (currentIndex + 1) % playBtns.length;
+                  if (currentIndex !== 0) {
+                    playBtns[currentIndex].click();
+                  } else {
+                    playAllMode = false;
+                  }
+                }
+              });
+            });
+          </script>
+        {% else %}
+          <div style="background: #232323; color: #1db954; border: none; border-radius: 1.2rem; font-size: 1.15rem; font-weight: 600; box-shadow: 0 2px 8px 0 #1db95422; text-align: center; margin-top: 2rem; padding: 1.2rem;">
+            <i class="fas fa-info-circle" style="margin-right: 0.5em;"></i>No songs in this album.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% include 'inc/is_paginated.html' %}
+{% endblock %}

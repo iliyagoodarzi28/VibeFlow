@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Genres{% endblock %}
+
+{% block content %}
+
+<div class="spotify-genre-list-bg" style="padding-top: 3rem; padding-bottom: 3rem;">
+  <div class="spotify-genre-list-container" style="max-width: 1000px; margin: 0 auto;">
+    <div class="spotify-genre-list-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+      <h1 style="margin: 0; font-size: 2.5rem; color: #1db954;">
+        <i class="fas fa-tags" style="margin-right: 0.5rem; color: #1db954;"></i>Genres
+      </h1>
+      <a href="{% url 'music:playlist_create' %}" class="spotify-create-btn" style="background: #1db954; color: #fff; padding: 0.5rem 1.2rem; border-radius: 2rem; text-decoration: none; font-weight: 600; display: flex; align-items: center;">
+        <i class="fas fa-music" style="margin-right: 0.5rem;"></i>Create
+      </a>
+    </div>
+    
+    {% if genres %}
+      <div class="spotify-genre-list-grid" style="display: flex; flex-wrap: wrap; gap: 2rem;">
+        {% for genre in genres %}
+          <div class="spotify-genre-card-wrapper" style="flex: 1 1 300px; max-width: 32%; min-width: 260px; display: flex;">
+            <div class="spotify-genre-card" style="background: #181818; border-radius: 1.2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; flex-direction: column; width: 100%; min-height: 260px; padding: 0;">
+              <div class="spotify-genre-artwork-placeholder" style="display: flex; align-items: center; justify-content: center; height: 90px; background: #232323; border-top-left-radius: 1.2rem; border-top-right-radius: 1.2rem; font-size: 2.5rem; color: #1db954;">
+                <i class="fas fa-tag"></i>
+              </div>
+              <div class="spotify-genre-card-body" style="flex: 1; display: flex; flex-direction: column; padding: 1.5rem;">
+                <h4 class="spotify-genre-title" style="margin-bottom: 0.5rem; font-size: 1.3rem;">
+                  <a href="{% url 'music:genre_detail' genre.pk %}" style="color: #fff; text-decoration: none; font-weight: 600;">
+                    {{ genre.name }}
+                  </a>
+                </h4>
+                {% if genre.description %}
+                  <p class="spotify-genre-description" style="margin-bottom: 0.75rem; color: #b3b3b3; font-size: 1rem;">{{ genre.description|truncatewords:20 }}</p>
+                {% else %}
+                  <p class="spotify-genre-description" style="margin-bottom: 0.75rem; color: #b3b3b3; font-style: italic; font-size: 1rem;">No description available.</p>
+                {% endif %}
+                <div style="margin-top: auto; padding-top: 0.5rem;">
+                  <span class="spotify-genre-song-count" style="color: #1db954; font-size: 1rem;">
+                    <i class="fas fa-music" style="margin-right: 0.3rem;"></i>
+                    {{ genre.song_set.count }} Song{{ genre.song_set.count|pluralize }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="spotify-empty-alert" style="background: #181818; color: #1db954; border-radius: 1rem; padding: 2rem; text-align: center; margin-top: 2rem;">
+        <i class="fa fa-info-circle" style="margin-right: 0.5rem;"></i> No genres are available.
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% include 'inc/is_paginated.html' %}
+
+{% endblock %}

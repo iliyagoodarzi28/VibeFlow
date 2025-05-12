@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Playlists{% endblock %}
+
+{% block content %}
+
+<div class="py-5" style="background: #181818;">
+  <div class="container" style="max-width: 1000px;">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <h1 class="mb-0" style="font-size: 2.5rem; color: #1db954;">
+        <i class="fas fa-list me-2"></i>Playlists
+      </h1>
+      <a href="{% url 'music:song_list' %}" class="btn btn-success d-flex align-items-center" style="background: #1db954; border: none;">
+        <i class="fas fa-music me-2"></i>Songs
+      </a>
+    </div>
+    <a href="{% url 'music:playlist_create' %}" class="btn btn-success d-inline-flex align-items-center mb-4" style="background: #1db954; border: none;">
+      <i class="fas fa-plus me-2"></i>Create Playlist
+    </a>
+    {% if playlists %}
+      <div class="row g-4">
+        {% for playlist in playlists %}
+          <div class="col-12 col-sm-6 col-md-4 d-flex">
+            <div class="card flex-fill shadow-sm" style="background: #181818; border-radius: 1.2rem; min-height: 260px;">
+              <div class="d-flex align-items-center justify-content-center" style="height: 90px; background: #232323; border-top-left-radius: 1.2rem; border-top-right-radius: 1.2rem; font-size: 2.5rem; color: #1db954;">
+                <i class="fas fa-list"></i>
+              </div>
+              <div class="card-body d-flex flex-column" style="padding: 1.5rem;">
+                <h4 class="card-title mb-2" style="font-size: 1.3rem;">
+                  <a href="{% url 'music:playlist_detail' playlist.pk %}" class="text-decoration-none fw-semibold" style="color: #fff;">
+                    {{ playlist.title }}
+                  </a>
+                </h4>
+                {% if playlist.description %}
+                  <p class="card-text mb-2" style="color: #b3b3b3; font-size: 1rem;">{{ playlist.description|truncatewords:20 }}</p>
+                {% else %}
+                  <p class="card-text mb-2 fst-italic" style="color: #b3b3b3; font-size: 1rem;">No description available.</p>
+                {% endif %}
+                <div class="mb-2" style="color: #b3b3b3; font-size: 0.98rem;">
+                  <span class="me-3">
+                    <i class="fas fa-user me-1"></i>{{ playlist.user.username }}
+                  </span>
+                  <span class="me-3">
+                    <i class="fas fa-calendar-alt me-1"></i>
+                    {% if playlist.release_date %}{{ playlist.release_date }}{% else %}No date{% endif %}
+                  </span>
+                  {% if playlist.is_public %}
+                    <span class="fw-semibold" style="color: #1db954;">
+                      <i class="fas fa-globe"></i> Public
+                    </span>
+                  {% else %}
+                    <span class="fw-semibold" style="color: #e74c3c;">
+                      <i class="fas fa-lock"></i> Private
+                    </span>
+                  {% endif %}
+                </div>
+                <div class="mt-auto pt-2">
+                  <span title="Songs" style="color: #1db954; font-size: 1rem;">
+                    <i class="fas fa-music me-1"></i> {{ playlist.songs.count }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="alert alert-info text-center mt-5" style="background: #181818; color: #1db954; border-radius: 1rem; border: none;">
+        <i class="fa fa-info-circle me-2"></i> No playlists are available.
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

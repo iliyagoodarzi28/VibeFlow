@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Albums{% endblock %}
+
+{% block content %}
+<div class="py-5" style="background: linear-gradient(120deg, #181818 70%, #1db954 100%); min-height: 100vh;">
+  <div class="container" style="max-width: 1200px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1 class="mb-0" style="font-size: 2.3rem; font-weight: 900; color: #1db954;">
+        <i class="fas fa-compact-disc me-2"></i>Albums
+      </h1>
+      <a href="{% url 'music:artist_list' %}" class="btn btn-success d-flex align-items-center" style="background: #1db954; border-radius: 2em; font-size: 1.15rem; font-weight: 700; box-shadow: 0 2px 8px 0 #1db95422;">
+        <i class="fas fa-users me-2"></i>Artists
+      </a>
+    </div>
+    <p class="text-center mb-4" style="font-size: 1.2rem; color: #b3b3b3;">
+      Browse the albums in our collection, beautifully presented.
+    </p>
+    {% if albums %}
+      <div class="row g-4">
+        {% for album in albums %}
+          <div class="col-12 col-sm-6 col-md-4 col-lg-3 d-flex">
+            <div class="card flex-fill shadow-sm" style="background: #232323; border-radius: 1.2rem; min-height: 100%; box-shadow: 0 4px 24px 0 #1db95422, 0 2px 8px #00000022;">
+              {% if album.cover %}
+                <div class="d-flex align-items-center justify-content-center" style="width: 100%; aspect-ratio: 1/1; background: #181818; border-top-left-radius: 1.2rem; border-top-right-radius: 1.2rem; overflow: hidden;">
+                  <img src="{{ album.cover.url }}" alt="{{ album.title }} cover" class="img-fluid w-100 h-100" style="object-fit: cover; display: block;">
+                </div>
+              {% else %}
+                <div class="d-flex align-items-center justify-content-center" style="width: 100%; aspect-ratio: 1/1; background: #181818; font-size: 3rem; color: #1db954; border-top-left-radius: 1.2rem; border-top-right-radius: 1.2rem;">
+                  <i class="fas fa-compact-disc"></i>
+                </div>
+              {% endif %}
+              <div class="card-body d-flex flex-column" style="padding: 1.5rem 1.2rem;">
+                <h4 class="card-title mb-2" style="font-size: 1.25rem; font-weight: 800; color: #fff;">
+                  <a href="{% url 'music:album_detail' album.pk %}" class="text-decoration-none" style="color: #fff;">
+                    {{ album.title }}
+                  </a>
+                </h4>
+                <p class="mb-2" style="color: #b3b3b3; font-size: 1.05rem;">
+                  <span style="color: #b3b3b3;">by</span>
+                  <a href="{% url 'music:artist_detail' album.artist.pk %}" class="fw-bold text-decoration-none" style="color: #1db954;">
+                    {{ album.artist }}
+                  </a>
+                </p>
+                {% if album.genres.all %}
+                  <div class="mb-2">
+                    {% for genre in album.genres.all %}
+                      <span class="badge" style="background: #1db954; color: #181818; font-weight: 700; font-size: 0.98rem; border-radius: 1rem; padding: 0.3em 1em; margin-right: 0.4em; margin-bottom: 0.2em; box-shadow: 0 1px 4px 0 #1db95422;">
+                        {{ genre }}
+                      </span>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+                {% if album.rating %}
+                  <div class="mt-auto">
+                    <span class="badge" style="background: #ffe066; color: #181818; font-size: 1.05rem; font-weight: 700; border-radius: 1rem; padding: 0.4em 1em; box-shadow: 0 1px 4px 0 #1db95422; display: inline-flex; align-items: center; gap: 0.3em;">
+                      <i class="fas fa-star me-1" style="color: #ffc107;"></i>{{ album.rating|floatformat:1 }}/5
+                    </span>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="alert alert-info text-center mt-5" style="background: #232323; color: #1db954; border-radius: 1.2rem; font-size: 1.15rem; font-weight: 600; box-shadow: 0 2px 8px 0 #1db95422; border: none;">
+        <i class="fas fa-info-circle me-2"></i>No albums are available.
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% include 'inc/is_paginated.html' %}
+
+{% endblock %}

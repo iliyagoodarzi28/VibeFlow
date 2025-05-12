@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}
+collaboration
+{% endblock %}
+
+{% block content %}
+<div style="background: linear-gradient(120deg, #181818 70%, #1db954 100%); min-height: 100vh; padding: 3rem 0;">
+  <div style="max-width: 900px; margin: 0 auto;">
+    <div style="margin: 0 auto; margin-bottom: 2.5rem;">
+      <div style="border-radius:2rem; overflow:hidden; box-shadow: 0 4px 24px 0 #1db95422, 0 2px 8px #00000022;">
+        <div style="background: linear-gradient(135deg, #1db954 60%, #181818 100%); border-top-left-radius:2rem; border-top-right-radius:2rem; padding: 2.5rem 2rem;">
+          <h1 style="margin-bottom: 0; font-weight: 900; color: #fff; letter-spacing:-1px;">
+            <i class="fas fa-users" style="margin-right: 0.7em; color: #fff;"></i>{{ collaboration.name }}
+          </h1>
+        </div>
+        <div style="background: transparent; padding: 2.5rem 2rem;">
+          {% if collaboration.description %}
+            <p style="font-size: 1.15rem; color: #b3b3b3; margin-bottom: 2rem;">{{ collaboration.description }}</p>
+          {% endif %}
+
+          <h3 style="font-weight: 900; margin-bottom: 1.2rem; color: #1db954;">
+            <i class="fas fa-user-friends" style="margin-right: 0.7em; color: #1db954;"></i>Artists in this collaboration
+          </h3>
+          {% if collaboration.artists.all %}
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+              {% for artist in collaboration.artists.all %}
+                <div style="background: #232323; border-radius: 1.2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.2rem;">
+                  <a href="{% url 'music:artist_detail' artist.pk %}" style="font-size:1.1rem; color: #fff; text-decoration: none; font-weight: 700;">
+                    <i class="fas fa-user" style="margin-right: 0.5em; color: #1db954;"></i>{{ artist.name }}
+                  </a>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div style="background: #232323; color: #1db954; border: none; border-radius: 1.2rem; font-size: 1.15rem; font-weight: 600; box-shadow: 0 2px 8px 0 #1db95422; text-align: center; margin-bottom: 2rem; padding: 1.2rem;">
+              <i class="fa fa-info-circle" style="margin-right: 0.7em;"></i> No artists found for this collaboration.
+            </div>
+          {% endif %}
+
+          <h3 style="font-weight: 900; margin-bottom: 1.2rem; color: #1db954;">
+            <i class="fas fa-music" style="margin-right: 0.7em; color: #1db954;"></i>Songs in this collaboration
+          </h3>
+          {% if collaboration.songs.all %}
+            <div style="margin-bottom: 2rem;">
+              {% for song in collaboration.songs.all %}
+                <div style="background: #181818; border-radius: 1rem; border: none; margin-bottom: 1.1em; padding: 1.1em 1.3em; box-shadow: 0 1px 4px 0 #1db95422; display: flex; flex-direction: column;">
+                  <div>
+                    <a href="{% url 'music:song_detail' song.pk %}" style="font-size:1.15rem; color: #fff; text-decoration: none; font-weight: 700;">
+                      <i class="fas fa-music" style="margin-right: 0.5em; color: #1db954;"></i>{{ song.title }}
+                    </a>
+                    <span style="color: #b3b3b3; font-size:1rem; margin-left: 1em;">
+                      by <a href="{% url 'music:artist_detail' song.artist.pk %}" style="color: #1db954; text-decoration: underline;">{{ song.artist.name }}</a>
+                      {% if song.album %}
+                        <span style="margin-left: 0.7em; font-size:0.98rem;">
+                          (from <a href="{% url 'music:album_detail' song.album.pk %}" style="color: #1db954; text-decoration: underline;">{{ song.album.title }}</a>)
+                        </span>
+                      {% endif %}
+                    </span>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div style="background: #232323; color: #1db954; border: none; border-radius: 1.2rem; font-size: 1.15rem; font-weight: 600; box-shadow: 0 2px 8px 0 #1db95422; text-align: center; margin-bottom: 2rem; padding: 1.2rem;">
+              <i class="fa fa-info-circle" style="margin-right: 0.7em;"></i> No songs found for this collaboration.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% include 'inc/is_paginated.html' %}
+
+{% endblock %}

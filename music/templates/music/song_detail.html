@@ -1,0 +1,513 @@
+{% extends "base.html" %}
+
+{% block title %}{{ song.title }} by {{ song.artist.name }}{% endblock %}
+
+{% block extra_headers %}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="music-detail-outer-center">
+  <section class="music-detail-container">
+    <div class="music-header music-glow">
+      <div class="music-header-flex">
+        <div class="music-album-artwork">
+          {% if song.image %}
+            <img src="{{ song.image.url }}" alt="{{ song.title }}">
+          {% elif song.album and song.album.cover %}
+            <img src="{{ song.album.cover.url }}" alt="{{ song.album.title }}">
+          {% else %}
+            <div class="music-album-artwork-placeholder">
+              <i class="bi bi-music-note-beamed" style="font-size: 4rem; color: #1db954;"></i>
+            </div>
+          {% endif %}
+        </div>
+        <h1 class="music-song-title">{{ song.title }}</h1>
+      </div>
+      <div class="music-meta">
+        <div class="music-meta-label">
+          <span>Song</span>
+        </div>
+        <div class="d-flex align-items-center music-meta-row">
+          {% if song.artist %}
+            <span>
+              <a href="{% url 'music:artist_detail' song.artist.pk %}" class="music-artist-link">
+                {{ song.artist.name }}
+              </a>
+            </span>
+          {% endif %}
+          {% if song.album %}
+            <span style="color: #444;">&middot;</span>
+            <span>
+              <a href="{% url 'music:album_detail' song.album.pk %}" class="music-album-link">
+                {{ song.album.title }}
+              </a>
+            </span>
+          {% endif %}
+          {% if song.release_date %}
+            <span style="color: #444;">&middot;</span>
+            <span class="music-release-date">{{ song.release_date|date:"Y" }}</span>
+          {% endif %}
+        </div>
+        {% if song.genres.all %}
+          <div class="music-genres">
+            {% for genre in song.genres.all %}
+              <span>{{ genre.name }}</span>
+            {% empty %}
+              <span style="color: #888;">No genres</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+        <div class="music-collaborators mt-2 mb-2">
+          {% if song.collaborations.all %}
+            <span style="color: #b3b3b3; font-size: 0.95rem; margin-right: 0.5rem;">Collaboration:</span>
+            {% for collaboration in song.collaborations.all %}
+              {% for artist in collaboration.artists.all %}
+                <a href="{% url 'music:artist_detail' artist.pk %}" class="music-artist-link" style="margin-right: 0.3rem;">
+                  {{ artist.name }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+              </a>{% if not forloop.last %}<span style="color: #444;">,</span>{% endif %}
+            {% empty %}
+              <span style="color: #888;">No collaborations</span>
+            {% endfor %}
+          {% endif %}
+        </div>
+        <div class="d-flex align-items-center music-song-actions">
+          <form method="post" action="{% url 'music:song_like' song.pk %}" class="music-like-form" id="likeForm">
+            {% csrf_token %}
+            <button type="submit" class="music-play-btn music-like-btn" id="likeBtn" aria-pressed="{% if user.is_authenticated and user in song.likes.all %}true{% else %}false{% endif %}">
+              <i class="bi bi-heart-fill music-like-icon" style="color: {% if user.is_authenticated and user in song.likes.all %}#1db954{% else %}#fff{% endif %};"></i>
+              <span id="likeBtnText">
+              {% if user.is_authenticated and user in song.likes.all %}
+                Unlike
+              {% else %}
+                Like
+              {% endif %}
+              </span>
+              <span style="color: #b3b3b3; font-size: 1rem;">(<span id="likeCount">{{ song.likes.count }}</span>)</span>
+              <span class="music-play-loading"><i class="fas fa-spinner fa-spin"></i></span>
+            </button>
+          </form>
+          <span class="music-play-btn music-like-btn" style="background: #232323;">
+            <i class="bi bi-bar-chart-fill"></i>
+            <span id="viewCount">{{ song.views.count }}</span> plays
+          </span>
+        </div>
+      </div>
+    </div>
+
+    {% if user.is_authenticated %}
+      <div class="card shadow border-0 rounded-5 mb-5 music-glow" style="max-width: 480px; margin: 0 auto; background: linear-gradient(135deg, #181818 80%, #1db954 100%); box-shadow: 0 8px 32px 0 rgba(30,185,84,0.15);">
+        <div class="card-body p-4" style="background: transparent;">
+          <form method="post" action="" id="addToPlaylistForm"
+                class="d-flex flex-wrap gap-3 align-items-center justify-content-center"
+                style="background: transparent;"
+                onsubmit="event.preventDefault(); var select = document.getElementById('playlistSelect'); if (select && select.value) { this.action = '{% url 'music:playlist_add_song' pk=0 %}'.replace('0', select.value); this.submit(); }">
+            {% csrf_token %}
+            <label for="playlistSelect" class="mb-0 fw-bold" style="color: #1db954; font-size: 1.1rem; letter-spacing: 0.5px;">
+              <i class="fas fa-plus-circle me-2" style="color: #1db954;"></i>Add to playlist
+            </label>
+            <select name="playlist_id" id="playlistSelect"
+                    class="form-select border-0 shadow-sm"
+                    style="width: 200px; background: #232323; color: #1db954; border-radius: 2rem; font-weight: 500; font-size: 1rem; box-shadow: 0 2px 8px 0 rgba(30,185,84,0.10);">
+              <option value="" selected disabled style="color: #1db954; background: #232323;">Select playlist</option>
+              {% for playlist in user.playlists.all %}
+                {% if song in playlist.songs.all %}
+                  <option value="{{ playlist.pk }}" style="color: #888; background: #232323;" disabled>
+                    {{ playlist.title }} (Already added)
+                  </option>
+                {% else %}
+                  <option value="{{ playlist.pk }}" style="color: #1db954; background: #232323;">
+                    {{ playlist.title }}
+                  </option>
+                {% endif %}
+              {% empty %}
+                <option value="" disabled style="color: #888; background: #232323;">No playlists found</option>
+              {% endfor %}
+            </select>
+            <input type="hidden" name="song_id" value="{{ song.pk }}">
+            <button type="submit"
+                    class="btn px-4 py-2 fw-bold"
+                    style="background: linear-gradient(90deg, #1db954 60%, #1ed760 100%); color: #181818; border: none; border-radius: 2rem; box-shadow: 0 2px 8px 0 rgba(30,185,84,0.10); transition: background 0.2s;">
+              <i class="fas fa-plus me-1"></i>Add
+            </button>
+          </form>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if song.audio_file %}
+    <div class="card shadow-lg border-0 rounded-4 bg-dark text-white mb-4" style="max-width: 600px; margin: 0 auto;">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-center mb-3">
+          <i class="fas fa-music fa-2x me-3 text-success"></i>
+          <h5 class="card-title mb-0 fw-bold" style="letter-spacing: -1px;">Now Playing</h5>
+        </div>
+        <div class="music-play">
+          <div class="music-play-controls mb-3 justify-content-center" style="display: flex; gap: 1rem;">
+            <button id="customPlayBtn" class="music-play-btn btn btn-success me-2" type="button" aria-pressed="false">
+              <i id="customPlayIcon" class="music-play-icon fas fa-play"></i>
+              <span id="customPlayText">Play</span>
+              <span class="music-play-loading"><i class="fas fa-spinner fa-spin"></i></span>
+            </button>
+            <button id="customStopBtn" class="music-play-btn btn btn-outline-light me-2" type="button">
+              <i id="customStopIcon" class="music-play-icon fas fa-stop"></i>
+              Stop
+            </button>
+            <button id="customRepeatBtn" class="music-play-btn btn btn-outline-success me-2" type="button" aria-pressed="false">
+              <i id="customRepeatIcon" class="music-play-icon fas fa-repeat"></i>
+              <span id="customRepeatText">Repeat Off</span>
+            </button>
+            <button id="customRandomBtn" class="music-play-btn btn btn-outline-success" type="button" aria-pressed="false">
+              <i id="customRandomIcon" class="music-play-icon fas fa-random"></i>
+              <span id="customRandomText">Random Off</span>
+            </button>
+          </div>
+          <div class="music-play-time-bar d-flex justify-content-center align-items-center mb-2">
+            <span id="currentTime" class="me-1">00:00</span>
+            <span class="mx-1">/</span>
+            <span id="totalTime" class="ms-1">00:00</span>
+          </div>
+          <div class="music-slider-container mb-2" style="width: 100%;">
+            <input type="range" id="musicSlider" min="0" max="100" value="0" step="0.1" class="form-range" style="accent-color: #1db954; width: 100%;">
+            <span id="sliderValue" class="visually-hidden">0</span>
+          </div>
+          <div class="music-play-progress mb-2" style="height: 6px; background: #232323; border-radius: 3px; width: 100%;">
+            <div class="music-play-progress-filled" style="background: linear-gradient(90deg, #1db954 0%, #1ed760 100%); height: 100%; border-radius: 3px; width: 0%;"></div>
+          </div>
+          <audio id="customAudio">
+            <source src="{{ song.audio_file.url }}" type="audio/mpeg">
+            Your browser does not support the audio element.
+          </audio>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if song.text %}
+      <div class="music-lyrics mt-3" style="max-width: 600px; margin: 0 auto; background: #181818cc; border-radius: 1.5rem; box-shadow: 0 2px 12px 0 #1db95411; padding: 2rem 2.2rem;">
+        <h3 class="music-lyrics-title" style="color: #1db954; font-weight: 800; font-size: 1.3rem; letter-spacing: 1px; margin-bottom: 1rem;">Lyrics / Description</h3>
+        <div class="music-lyrics-text" style="color: #fff; font-size: 1.08rem; line-height: 1.7; white-space: pre-line;">{{ song.text|linebreaksbr }}</div>
+      </div>
+    {% endif %}
+
+    <hr class="music-song-divider" style="border: none; border-top: 2px solid #232323; margin: 2.5rem 0 2rem 0; max-width: 600px;">
+
+    <div class="music-comments-section" style="max-width: 600px; margin: 0 auto 2rem auto; background: #181818cc; border-radius: 1.5rem; box-shadow: 0 2px 12px 0 #1db95411; padding: 2rem 2.2rem;">
+      <h2 class="music-comments-title" style="color: #1db954; font-size: 1.4rem; font-weight: 800; letter-spacing: 1px; margin-bottom: 1.5rem;">
+        <i class="bi bi-chat-dots"></i> Comments
+      </h2>
+      <div id="commentsList">
+      {% for comment in comments %}
+        <div class="music-comment d-flex align-items-start" id="comment-{{ comment.id }}" style="margin-bottom: 1.5rem; border-bottom: 1px solid #232323; padding-bottom: 1.2rem;">
+          <div class="music-comment-avatar" style="margin-right: 1rem;">
+            <i class="bi bi-person-circle" style="font-size: 2.2rem; color: #1db954;"></i>
+          </div>
+          <div class="music-comment-body" style="flex: 1;">
+            <div class="d-flex align-items-center music-comment-header" style="gap: 0.7rem;">
+              <span class="music-comment-author" style="color: #fff; font-weight: 700; font-size: 1.08rem;">{{ comment.name }}</span>
+              <span class="music-comment-timestamp" style="color: #b3b3b3; font-size: 0.98rem;">{{ comment.timestamp|date:"M d, Y H:i" }}</span>
+            </div>
+            <div class="music-comment-text" style="color: #eaeaea; font-size: 1.05rem; margin-top: 0.3rem;">{{ comment.text|linebreaksbr }}</div>
+            {% if request.user == comment.user %}
+              <div class="d-flex music-comment-actions" style="gap: 0.5rem; margin-top: 0.5rem;">
+                <a href="{% url 'music:comment_edit' comment.id %}" class="btn btn-sm btn-outline-light music-comment-edit-btn" style="border-radius: 1rem; font-size: 0.95rem;">Edit</a>
+                <form method="post" action="{% url 'music:comment_delete' comment.id %}" class="music-comment-delete-form" data-comment-id="{{ comment.id }}" style="display: inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-outline-danger music-comment-delete-btn" style="border-radius: 1rem; font-size: 0.95rem;">Delete</button>
+                </form>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% empty %}
+        <p class="music-no-comments" id="noCommentsMsg" style="color: #888; text-align: center; font-size: 1.08rem;">There are no comments yet. Be the first to comment!</p>
+      {% endfor %}
+      </div>
+      <div class="music-comment-form mt-4" style="margin-top: 2.5rem;">
+        <h3 class="music-comment-form-title" style="color: #1db954; font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem;">Add a comment</h3>
+        <form method="post" class="cosmic-form music-comment-form-inner" id="commentForm">
+          {% csrf_token %}
+          <div style="margin-bottom: 1rem;">
+            {{ form.as_p }}
+          </div>
+          <button type="submit" class="btn btn-outline-success" id="commentSubmitBtn" style="border-radius: 1.2rem; font-weight: 700; padding: 0.5rem 1.5rem;">
+            <i class="bi bi-send"></i> <span id="commentBtnText">Send</span>
+            <span class="music-play-loading" id="commentLoading" style="display:none;"><i class="fas fa-spinner fa-spin"></i></span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const audioEl       = document.getElementById("customAudio");
+  const playBtn       = document.getElementById("customPlayBtn");
+  const playIcon      = document.getElementById("customPlayIcon");
+  const playText      = document.getElementById("customPlayText");
+  const stopBtn       = document.getElementById("customStopBtn");
+  const repeatBtn     = document.getElementById("customRepeatBtn");
+  const repeatText    = document.getElementById("customRepeatText");
+  const randomBtn     = document.getElementById("customRandomBtn");
+  const randomText    = document.getElementById("customRandomText");
+  const progressBar   = document.querySelector(".music-play-progress-filled");
+  const currentTimeEl = document.getElementById("currentTime");
+  const totalTimeEl   = document.getElementById("totalTime");
+  const musicSlider   = document.getElementById("musicSlider");
+  const sliderValue   = document.getElementById("sliderValue");
+  const viewCount     = document.getElementById("viewCount");
+
+  let randomMode = false;
+  let isSeeking = false;
+  let viewAdded = false; // Track if view has been added for this play
+
+  // --- Listening History Fix ---
+  // This function will send a POST request to add the song to the user's listening history
+
+  function formatTime(seconds) {
+    if (isNaN(seconds) || seconds === Infinity) return "00:00";
+    const minutes = Math.floor(seconds / 60);
+    let secs = Math.floor(seconds % 60);
+    if (secs < 10) secs = "0" + secs;
+    return minutes + ":" + secs;
+  }
+
+  function setPlayState(isPlaying) {
+    if (playBtn) playBtn.setAttribute("aria-pressed", isPlaying ? "true" : "false");
+    if (playIcon) {
+      playIcon.classList.remove(isPlaying ? "fa-play" : "fa-pause");
+      playIcon.classList.add(isPlaying ? "fa-pause" : "fa-play");
+    }
+    if (playText) playText.textContent = isPlaying ? "Pause" : "Play";
+  }
+
+  function resetPlayerUI() {
+    if (progressBar) progressBar.style.width = "0%";
+    if (currentTimeEl) currentTimeEl.textContent = "00:00";
+    if (musicSlider) musicSlider.value = 0;
+    if (sliderValue) sliderValue.textContent = "0";
+    viewAdded = false; // Allow view to be added again on next play
+  }
+
+  // Add view when song is played (first time per play)
+  function addSongView() {
+    if (viewAdded) return;
+    viewAdded = true;
+    fetch("{% url 'music:song_play' song.pk %}", {
+      method: "POST",
+      headers: {
+        "X-Requested-With": "XMLHttpRequest",
+        "X-CSRFToken": "{{ csrf_token }}"
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (typeof data.count !== "undefined" && viewCount) {
+        viewCount.textContent = data.count;
+      }
+    })
+    .catch(() => {
+      // Optionally handle error, but don't block playback
+    });
+  }
+
+  if (audioEl) {
+    ["waiting", "loadstart"].forEach(evt =>
+      audioEl.addEventListener(evt, function() {
+        if (playBtn) playBtn.classList.add("loading");
+      })
+    );
+    ["playing", "canplay"].forEach(evt =>
+      audioEl.addEventListener(evt, function() {
+        if (playBtn) playBtn.classList.remove("loading");
+      })
+    );
+
+    audioEl.addEventListener("loadedmetadata", function() {
+      if (totalTimeEl) totalTimeEl.textContent = formatTime(audioEl.duration);
+    });
+
+    audioEl.addEventListener("timeupdate", function() {
+      if (audioEl.duration && !isSeeking) {
+        const percent = (audioEl.currentTime / audioEl.duration) * 100;
+        if (progressBar) progressBar.style.width = percent + "%";
+        if (currentTimeEl) currentTimeEl.textContent = formatTime(audioEl.currentTime);
+        if (musicSlider) musicSlider.value = percent;
+        if (sliderValue) sliderValue.textContent = Math.round(percent);
+      }
+      // Add view if playback has started and not yet counted for this play
+      if (!audioEl.paused && !viewAdded && audioEl.currentTime > 0.5) {
+        addSongView();
+        // --- Listening History Fix: Add to history when playback starts ---
+        addToListeningHistory();
+        // --- End Listening History Fix ---
+      }
+    });
+
+    if (playBtn) {
+      playBtn.addEventListener("click", function() {
+        playBtn.classList.add("loading");
+        if (audioEl.paused) {
+          audioEl.play().then(() => {
+            setPlayState(true);
+            playBtn.classList.remove("loading");
+            // View and history will be added on timeupdate when playback starts
+          }).catch(() => {
+            playBtn.classList.remove("loading");
+            alert("Failed to play audio. Please try again.");
+          });
+        } else {
+          audioEl.pause();
+          setPlayState(false);
+          playBtn.classList.remove("loading");
+        }
+      });
+
+      playBtn.addEventListener("keydown", function(e) {
+        if (e.key === " " || e.key === "Enter") {
+          e.preventDefault();
+          playBtn.click();
+        }
+      });
+    }
+
+    if (stopBtn) {
+      stopBtn.addEventListener("click", function() {
+        audioEl.pause();
+        audioEl.currentTime = 0;
+        setPlayState(false);
+        resetPlayerUI();
+      });
+    }
+
+    if (repeatBtn) {
+      repeatBtn.addEventListener("click", function() {
+        audioEl.loop = !audioEl.loop;
+        repeatBtn.setAttribute("aria-pressed", audioEl.loop ? "true" : "false");
+        if (repeatText) repeatText.textContent = audioEl.loop ? "Repeat On" : "Repeat Off";
+        repeatBtn.classList.toggle("active", audioEl.loop);
+      });
+    }
+
+    if (randomBtn) {
+      randomBtn.addEventListener("click", function() {
+        randomMode = !randomMode;
+        randomBtn.setAttribute("aria-pressed", randomMode ? "true" : "false");
+        if (randomText) randomText.textContent = randomMode ? "Random On" : "Random Off";
+        randomBtn.classList.toggle("active", randomMode);
+      });
+    }
+
+    if (musicSlider) {
+      musicSlider.addEventListener("input", function() {
+        isSeeking = true;
+        if (audioEl.duration) {
+          const newTime = (musicSlider.value / 100) * audioEl.duration;
+          if (currentTimeEl) currentTimeEl.textContent = formatTime(newTime);
+          if (sliderValue) sliderValue.textContent = Math.round(musicSlider.value);
+          if (progressBar) progressBar.style.width = musicSlider.value + "%";
+        }
+      });
+      musicSlider.addEventListener("change", function() {
+        if (audioEl.duration) {
+          const newTime = (musicSlider.value / 100) * audioEl.duration;
+          audioEl.currentTime = newTime;
+        }
+        isSeeking = false;
+      });
+    }
+
+    audioEl.addEventListener("ended", function() {
+      setPlayState(false);
+      if (!audioEl.loop) {
+        if (randomMode) {
+          if (playBtn) playBtn.classList.add("loading");
+          fetch("{% url 'music:random_song' %}")
+            .then(response => response.json())
+            .then(data => {
+              if (playBtn) playBtn.classList.remove("loading");
+              if (data.song_url) {
+                window.location.href = data.song_url;
+              } else {
+                resetPlayerUI();
+              }
+            })
+            .catch(() => {
+              if (playBtn) playBtn.classList.remove("loading");
+              resetPlayerUI();
+              alert("Failed to load a random song.");
+            });
+        } else {
+          resetPlayerUI();
+        }
+      }
+    });
+  }
+
+  const likeForm = document.getElementById("likeForm");
+  const likeBtn = document.getElementById("likeBtn");
+  const likeBtnText = document.getElementById("likeBtnText");
+  const likeCount = document.getElementById("likeCount");
+
+  // Fix: Properly determine likedState using Django template logic
+  let likedState = {% if user.is_authenticated and user in song.likes.all %}true{% else %}false{% endif %};
+
+  if (likeForm && likeBtn && likeBtnText && likeCount) {
+    likeForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+      likeBtn.setAttribute("disabled", "disabled");
+      likeBtn.classList.add("loading");
+      likedState = !likedState;
+      let count = parseInt(likeCount.textContent, 10) || 0;
+      if (likedState) {
+        likeBtnText.textContent = "Unlike";
+        likeCount.textContent = count + 1;
+        likeBtn.classList.add("active");
+      } else {
+        likeBtnText.textContent = "Like";
+        likeCount.textContent = count > 0 ? count - 1 : 0;
+        likeBtn.classList.remove("active");
+      }
+      fetch(likeForm.action, {
+        method: "POST",
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+          "X-CSRFToken": likeForm.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (typeof data.liked !== "undefined" && typeof data.count !== "undefined") {
+          likedState = data.liked;
+          likeBtnText.textContent = data.liked ? "Unlike" : "Like";
+          likeCount.textContent = data.count;
+          likeBtn.classList.toggle("active", data.liked);
+        }
+        likeBtn.removeAttribute("disabled");
+        likeBtn.classList.remove("loading");
+      })
+      .catch(() => {
+        likedState = !likedState;
+        let count = parseInt(likeCount.textContent, 10) || 0;
+        if (likedState) {
+          likeBtnText.textContent = "Unlike";
+          likeCount.textContent = count + 1;
+          likeBtn.classList.add("active");
+        } else {
+          likeBtnText.textContent = "Like";
+          likeCount.textContent = count > 0 ? count - 1 : 0;
+          likeBtn.classList.remove("active");
+        }
+        likeBtn.removeAttribute("disabled");
+        likeBtn.classList.remove("loading");
+        alert("Failed to update like. Please try again.");
+      });
+    });
+  }
+
+});
+</script>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}About{% endblock %}
+{% block extra_headers %}
+{% endblock %}
+
+{% block content %}
+<div class="spotify-about-hero" style="box-shadow: 0 4px 24px 0 #1db95422, 0 2px 8px #00000022; border-radius: 1.5rem; margin-bottom: 2.5rem; padding: 2.5rem 2rem; text-align: center;">
+    <h1 style="font-weight: 900; font-size: 2.5rem; margin-bottom: 1.2rem;">
+        <i class="fas fa-music"></i>
+        {{ site_info.name|default:"Melody" }}
+    </h1>
+    {% if site_info.image_header %}
+        <img src="{{ site_info.image_header.url }}" alt="Header Image" style="max-width: 100%; border-radius: 1rem; margin-bottom: 1.5rem;">
+    {% endif %}
+</div>
+
+<div style="max-width: 850px; margin: 0 auto;">
+    {% if site_info.about %}
+        <div class="spotify-about-content" style="background: #232323; color: #fff; border-radius: 1.2rem; box-shadow: 0 2px 8px 0 #1db95422; padding: 2rem 1.5rem; margin-bottom: 2rem;">
+            {{ site_info.about|linebreaks }}
+        </div>
+    {% endif %}
+
+    <div class="spotify-about-contact-card" style="background: #232323; color: #fff; border-radius: 1.2rem; box-shadow: 0 2px 8px 0 #1db95422; padding: 2rem 1.5rem;">
+        <h5 style="color: #1db954; font-weight: 700; margin-bottom: 1.2rem;">
+            <i class="fas fa-address-book" style="margin-right: 0.5em;"></i>
+            Contact Information
+        </h5>
+        <ul style="list-style: none; padding: 0; margin-bottom: 1.5rem;">
+            {% if site_info.phone %}
+                <li style="margin-bottom: 0.7em;">
+                    <i class="fas fa-phone" style="margin-right: 0.5em;"></i>
+                    <span><strong>Phone:</strong> {{ site_info.phone }}</span>
+                </li>
+            {% endif %}
+            {% if site_info.email %}
+                <li style="margin-bottom: 0.7em;">
+                    <i class="fas fa-envelope" style="margin-right: 0.5em;"></i>
+                    <span>
+                        <strong>Email:</strong>
+                        <a href="mailto:{{ site_info.email }}" style="color:#1db954;">{{ site_info.email }}</a>
+                    </span>
+                </li>
+            {% endif %}
+            {% if site_info.address %}
+                <li>
+                    <i class="fas fa-map-marker-alt" style="margin-right: 0.5em;"></i>
+                    <span><strong>Address:</strong> {{ site_info.address|linebreaksbr }}</span>
+                </li>
+            {% endif %}
+        </ul>
+        <div class="spotify-about-social" style="margin-top: 1.2rem;">
+            {% if site_info.instagram %}
+                <a href="{{ site_info.instagram }}" target="_blank" title="Instagram" style="color: #fff; background: #1db954; border-radius: 0.7em; padding: 0.4em 1em; margin-right: 0.7em; text-decoration: none; font-weight: 600; display: inline-block;">
+                    <i class="fab fa-instagram" style="margin-right: 0.4em;"></i>Instagram
+                </a>
+            {% endif %}
+            {% if site_info.telegram %}
+                <a href="{{ site_info.telegram }}" target="_blank" title="Telegram" style="color: #fff; background: #1db954; border-radius: 0.7em; padding: 0.4em 1em; text-decoration: none; font-weight: 600; display: inline-block;">
+                    <i class="fab fa-telegram-plane" style="margin-right: 0.4em;"></i>Telegram
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

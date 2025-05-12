@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Signup{% endblock %}
+
+{% block extra_headers %}
+{% endblock %}
+
+{% block content %}
+<div class="star-field"></div>
+<div style="display: flex; justify-content: center; align-items: center; min-height: 80vh;">
+  <div style="max-width: 400px; width: 100%; background: #232323; color: #fff; border-radius: 1.5rem; box-shadow: 0 4px 24px 0 #1db95422, 0 2px 8px #00000022; padding: 2.5rem 2rem; margin: 0 auto;">
+      <h2 style="font-weight: 900; color: #1db954; margin-bottom: 2rem; text-align: center;">
+          Sign up to {{ site_info.name|default:"your account" }}
+      </h2>
+      {% if messages %}
+        <ul style="list-style: none; padding: 0; margin-bottom: 1.5rem;">
+          {% for message in messages %}
+            <li style="background: #181818; color: #ff4d4f; border-radius: 0.7rem; padding: 0.7em 1em; margin-bottom: 0.5em; text-align: center;">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      <center>
+      <form method="post" autocomplete="off">
+          {% csrf_token %}
+          {% for field in form %}
+              <div style="margin-bottom: 1.2rem;">
+                  <label for="{{ field.id_for_label }}" style="display: block; font-weight: 600; margin-bottom: 0.4em;">{{ field.label }}</label>
+                  {{ field }}
+                  {% if field.errors %}
+                      <ul style="list-style: none; padding: 0; margin: 0.5em 0 0 0;">
+                      {% for error in field.errors %}
+                          <li style="background:#b91c1c;color:#fff;border-left:4px solid #ff4b4b; border-radius: 0.4em; padding: 0.4em 0.8em; margin-bottom: 0.3em;">{{ error }}</li>
+                      {% endfor %}
+                      </ul>
+                  {% endif %}
+              </div>
+          {% endfor %}
+          <button type="submit" style="width: 100%; background: #1db954; color: #fff; border: none; border-radius: 1rem; padding: 0.7em 0; font-size: 1.1rem; font-weight: 700; letter-spacing: 0.03em; box-shadow: 0 2px 8px 0 #1db95422; transition: background 0.15s;">
+              Sign Up
+          </button>
+      </form>
+      </center>
+      <p style="margin-top: 2rem; text-align: center; color: #b3b3b3;">
+          Already have an account?
+          <a href="{% url 'accounts:login' %}" style="color: #1db954; text-decoration: underline; font-weight: 600;">Log in</a>
+      </p>
+  </div>
+</div>
+{% endblock %}

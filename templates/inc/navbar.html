@@ -1,0 +1,184 @@
+<nav class="navbar navbar-expand-lg spotify-navbar shadow-sm">
+  <div class="container-fluid" style="max-width: 1200px;">
+    <a class="navbar-brand d-flex align-items-center" href="{% url 'main:home' %}">
+      <i class="fas fa-music me-2 spotify-navbar-logo"></i>
+      <span class="fw-bold">{{ site_info.name|default:"Melody" }}</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMusic" aria-controls="navbarMusic" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarMusic">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" aria-current="page" href="{% url 'main:home' %}">
+            <i class="fas fa-home me-1 d-none d-lg-inline"></i>Home
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'song_list' %}active{% endif %}" href="{% url 'music:song_list' %}">
+            <i class="fas fa-music me-1 d-none d-lg-inline"></i>Songs
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'album_list' %}active{% endif %}" href="{% url 'music:album_list' %}">
+            <i class="fas fa-compact-disc me-1 d-none d-lg-inline"></i>Albums
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'artist_list' %}active{% endif %}" href="{% url 'music:artist_list' %}">
+            <i class="fas fa-users me-1 d-none d-lg-inline"></i>Artists
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'genre_list' %}active{% endif %}" href="{% url 'music:genre_list' %}">
+            <i class="fas fa-tags me-1 d-none d-lg-inline"></i>Genres
+          </a>
+        </li>
+        {% if user.is_authenticated %}
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'playlist_list' %}active{% endif %}" href="{% url 'music:playlist_list' %}">
+            <i class="fas fa-list-ul me-1 d-none d-lg-inline"></i>Playlists
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" href="{% url 'accounts:profile' %}">
+            <i class="fas fa-user-circle me-1 d-none d-lg-inline"></i>Profile
+          </a>
+        </li>
+        {% else %}
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'login' %}active{% endif %}" href="{% url 'accounts:login' %}">
+            <i class="fas fa-sign-in-alt me-1 d-none d-lg-inline"></i>Login
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'signup' %}active{% endif %}" href="{% url 'accounts:signup' %}">
+            <i class="fas fa-user-plus me-1 d-none d-lg-inline"></i>Sign Up
+          </a>
+        </li>
+        {% endif %}
+      </ul>
+      <form class="d-flex ms-lg-3" method="get" action="{% url 'music:search' %}">
+        <input class="form-control me-2" type="search" name="q" placeholder="Search music..." aria-label="Search" value="{{ query|default_if_none:'' }}">
+        <button class="btn btn-success" type="submit">
+          <i class="fas fa-search"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+</nav>
+<style>
+/* --- Spotify-Inspired Navbar --- */
+.navbar {
+  background: linear-gradient(120deg, #191414 60%, #1db954 100%);
+  border-bottom: none;
+  box-shadow: 0 4px 24px 0 #1db95422, 0 2px 8px #00000022;
+  font-family: 'Circular Std', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.navbar .navbar-brand {
+  color: #1db954 !important;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  font-size: 1.6rem;
+  transition: color 0.2s;
+}
+
+.navbar .navbar-brand:hover {
+  color: #1ed760 !important;
+}
+
+.navbar-nav .nav-link {
+  color: #fff !important;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  border-radius: 2rem;
+  padding: 0.45em 1.2em;
+  margin: 0 0.2em;
+  transition: background 0.18s, color 0.18s;
+}
+
+.navbar-nav .nav-link.active,
+.navbar-nav .nav-link:focus,
+.navbar-nav .nav-link:hover {
+  background: linear-gradient(90deg, #1db954 80%, #1ed760 100%);
+  color: #181818 !important;
+  box-shadow: 0 2px 8px 0 #1db95433;
+  text-decoration: none;
+}
+
+.navbar-nav .nav-item .nav-link i {
+  color: #1db954;
+  transition: color 0.18s;
+}
+
+.navbar-nav .nav-link.active i,
+.navbar-nav .nav-link:focus i,
+.navbar-nav .nav-link:hover i {
+  color: #181818;
+}
+
+.navbar .btn-success,
+.navbar .btn-outline-success {
+  border-radius: 2rem;
+  font-weight: 700;
+  padding: 0.45em 1.5em;
+  font-size: 1.05rem;
+  background: transparent;
+  color: #1db954;
+  border: 2px solid #1db954;
+  box-shadow: 0 1px 4px 0 #1db95411;
+  transition: background 0.18s, color 0.18s, border 0.18s, box-shadow 0.18s;
+  outline: none;
+}
+
+.navbar .btn-success:hover,
+.navbar .btn-success:focus,
+.navbar .btn-outline-success:hover,
+.navbar .btn-outline-success:focus {
+  background: linear-gradient(90deg, #1db954 80%, #1ed760 100%);
+  color: #181818 !important;
+  border-color: #1db954 !important;
+  box-shadow: 0 4px 16px 0 #1db95433;
+}
+
+.navbar .form-control {
+  border-radius: 2rem;
+  border: 1.5px solid #1db95444;
+  background: #232323;
+  color: #fff;
+  font-weight: 500;
+  transition: border 0.18s, box-shadow 0.18s;
+}
+
+.navbar .form-control:focus {
+  border-color: #1db954;
+  box-shadow: 0 0 0 0.15rem #1db95433;
+  background: #181818;
+  color: #fff;
+}
+
+@media (max-width: 991.98px) {
+  .navbar-nav .nav-link {
+    margin: 0.2em 0;
+    padding: 0.7em 1.2em;
+    text-align: left;
+  }
+  .navbar .form-control {
+    margin-bottom: 0.5em;
+  }
+}
+
+/* Hide default navbar toggler border */
+.navbar-toggler {
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+
+.navbar-toggler:focus {
+  box-shadow: 0 0 0 0.15rem #1db95433;
+}
+
+/* --- End Spotify-Inspired Navbar --- */
+</style>

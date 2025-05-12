@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block extra_headers %}
+{% endblock %}
+
+{% block content %}
+<div class="star-field"></div>
+<div style="max-width: 400px; margin: 3rem auto; background: #232323; color: #fff; border-radius: 1.5rem; box-shadow: 0 4px 24px 0 #1db95422, 0 2px 8px #00000022; padding: 2.5rem 2rem;">
+    <h2 style="font-weight: 900; color: #1db954; margin-bottom: 2rem; text-align: center;">
+        Log in to {{ site_info.name|default:"your account" }}
+    </h2>
+    {% if messages %}
+      <ul style="list-style: none; padding: 0; margin-bottom: 1.5rem;">
+        {% for message in messages %}
+          <li style="background: #181818; color: #ff4d4f; border-radius: 0.7rem; padding: 0.7em 1em; margin-bottom: 0.5em; text-align: center;">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    <form method="post" autocomplete="off">
+        {% csrf_token %}
+        <div style="margin-bottom: 1.2rem;">
+            <label for="id_username" style="display: block; font-weight: 600; margin-bottom: 0.4em;">Username</label>
+            <input type="text" name="username" id="id_username" required style="width: 100%; padding: 0.7em; border-radius: 0.7rem; border: 1.5px solid #1db954; background: #181818; color: #fff; font-size: 1rem;">
+        </div>
+        <div style="margin-bottom: 1.7rem;">
+            <label for="id_password" style="display: block; font-weight: 600; margin-bottom: 0.4em;">Password</label>
+            <input type="password" name="password" id="id_password" required style="width: 100%; padding: 0.7em; border-radius: 0.7rem; border: 1.5px solid #1db954; background: #181818; color: #fff; font-size: 1rem;">
+        </div>
+        <button type="submit" style="width: 100%; background: #1db954; color: #fff; border: none; border-radius: 1rem; padding: 0.7em 0; font-size: 1.1rem; font-weight: 700; letter-spacing: 0.03em; box-shadow: 0 2px 8px 0 #1db95422; transition: background 0.15s;">
+            Log In
+        </button>
+    </form>
+    <p style="margin-top: 2rem; text-align: center; color: #b3b3b3;">
+        Don't have an account?
+        <a href="{% url 'accounts:signup' %}" style="color: #1db954; text-decoration: underline; font-weight: 600;">Sign up</a>
+    </p>
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {% if form.instance.pk %}Edit Playlist{% else %}Create Playlist{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="spotify-playlist-form-bg" style="padding: 3rem 0;">
+  <div style="max-width: 500px; margin: 0 auto;">
+    <div class="spotify-playlist-form-card" style="background: #181818; border-radius: 1.2rem; box-shadow: 0 2px 16px rgba(0,0,0,0.18); padding: 2.5rem 2rem;">
+      <div class="spotify-playlist-form-header" style="margin-bottom: 2rem;">
+        <h2 style="margin: 0; font-size: 2rem; color: #1db954;">
+          {% if form.instance.pk %}
+            <i class="fas fa-edit" style="margin-right: 0.7rem;"></i>Edit Playlist
+          {% else %}
+            <i class="fas fa-plus" style="margin-right: 0.7rem;"></i>Create Playlist
+          {% endif %}
+        </h2>
+      </div>
+      <div class="spotify-playlist-form">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% for field in form %}
+            <div style="margin-bottom: 1.5rem;">
+              <label for="{{ field.id_for_label }}" style="display: block; font-weight: 600; color: #fff; margin-bottom: 0.5rem;">
+                {{ field.label }}
+              </label>
+              {{ field }}
+              {% if field.help_text %}
+                <div style="color: #b3b3b3; font-size: 0.97rem; margin-top: 0.2rem;">{{ field.help_text }}</div>
+              {% endif %}
+              {% for error in field.errors %}
+                <div style="color: #e74c3c; font-size: 0.97rem; margin-top: 0.2rem;">{{ error }}</div>
+              {% endfor %}
+            </div>
+          {% endfor %}
+          <div class="spotify-playlist-form-actions" style="display: flex; gap: 1rem; align-items: center; margin-top: 2rem;">
+            <button type="submit" class="spotify-btn-green" style="background: #1db954; color: #fff; border: none; border-radius: 2rem; padding: 0.7rem 2.2rem; font-weight: 700; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center;">
+              {% if form.instance.pk %}
+                <i class="fas fa-save" style="margin-right: 0.5rem;"></i>Update
+              {% else %}
+                <i class="fas fa-plus" style="margin-right: 0.5rem;"></i>Create
+              {% endif %}
+              Playlist
+            </button>
+            <a href="{% url 'music:playlist_list' %}" class="spotify-btn-outline" style="background: none; color: #1db954; border: 2px solid #1db954; border-radius: 2rem; padding: 0.7rem 2.2rem; font-weight: 700; font-size: 1.1rem; text-decoration: none; display: flex; align-items: center;">
+              <i class="fas fa-arrow-left" style="margin-right: 0.5rem;"></i>Cancel
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

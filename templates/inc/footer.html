@@ -1,0 +1,72 @@
+<footer class="spotify-footer text-light pt-5 pb-3 mt-5" style="background: #000;">
+  <div class="container" style="max-width: 1200px;">
+    <div class="row gy-4 justify-content-between align-items-start">
+      <!-- Brand & Slogan -->
+      <div class="col-12 col-md-4 d-flex flex-column align-items-md-start align-items-center mb-3 mb-md-0">
+        <div class="spotify-footer-brand mb-2 d-flex align-items-center">
+          <i class="fas fa-music" style="font-size: 2.5rem; color: #1db954; filter: drop-shadow(0 0 8px #1db95499); margin-right: 0.5rem;"></i>
+          <span class="fw-bold fs-4">{{ site_info.name|default:"Melody" }}</span>
+        </div>
+        <div class="spotify-footer-slogan text-secondary">
+          Feel the music. Share the vibe.
+        </div>
+      </div>
+      <!-- Navigation -->
+      <div class="col-12 col-md-2 d-flex flex-column align-items-center mb-3 mb-md-0">
+        <h6 class="mb-2 text-success">Quick Links</h6>
+        <ul class="list-unstyled text-center mb-0">
+          <li class="mb-2">
+            <a class="text-decoration-none text-light" href="{% url 'main:home' %}">Home</a>
+          </li>
+          <li class="mb-2">
+            <a class="text-decoration-none text-light" href="{% url 'main:about' %}">About</a>
+          </li>
+        </ul>
+      </div>
+      <!-- Contact & Social -->
+      <div class="col-12 col-md-4 d-flex flex-column align-items-md-end align-items-center">
+        <h6 class="mb-2 text-success">Contact & Social</h6>
+        <ul class="list-unstyled text-md-end text-center mb-2">
+          {% if site_info.email %}
+            <li class="mb-2">
+              <i class="fas fa-envelope me-2"></i>
+              <a class="text-decoration-none text-light" href="mailto:{{ site_info.email }}">{{ site_info.email }}</a>
+            </li>
+          {% endif %}
+          {% if site_info.phone %}
+            <li class="mb-2">
+              <i class="fas fa-phone me-2"></i>
+              <span>{{ site_info.phone }}</span>
+            </li>
+          {% endif %}
+          {% if site_info.address %}
+            <li class="mb-2">
+              <i class="fas fa-map-marker-alt me-2"></i>
+              <span>{{ site_info.address|linebreaksbr }}</span>
+            </li>
+          {% endif %}
+        </ul>
+        <div class="spotify-footer-social mt-2">
+          {% if site_info.instagram %}
+            <a href="{{ site_info.instagram }}" target="_blank" title="Instagram" class="text-light me-3 fs-5">
+              <i class="fab fa-instagram"></i>
+            </a>
+          {% endif %}
+          {% if site_info.telegram %}
+            <a href="{{ site_info.telegram }}" target="_blank" title="Telegram" class="text-light fs-5">
+              <i class="fab fa-telegram-plane"></i>
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <hr class="my-4 border-secondary">
+    <div class="row">
+      <div class="col text-center">
+        <div class="small text-secondary">
+          &copy; {{ current_year|default:2024 }} {{ site_info.name|default:"Melody" }}. All rights reserved.
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>

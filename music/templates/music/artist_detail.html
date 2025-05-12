@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}{{ artist.name|default:"Artist Detail" }}{% endblock %}
+
+{% block content %}
+
+<div style="background: linear-gradient(120deg, #181818 70%, #1db954 100%); min-height: 100vh; padding: 3rem 0;">
+  <div style="max-width: 900px; margin: 0 auto;">
+    <!-- HERO SECTION -->
+    <div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 2.5rem; background: #232323; border-radius: 1.5rem; box-shadow: 0 4px 24px 0 #1db95422, 0 2px 8px #00000022; padding: 2.5rem 2rem; margin-bottom: 2.5rem;">
+      {% if artist.image %}
+        <img src="{{ artist.image.url }}" alt="{{ artist.name }} image" style="height: 180px; width: 180px; object-fit: cover; background: #181818; border-radius: 1rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px 0 #1db95422;">
+      {% else %}
+        <div style="height: 180px; width: 180px; background: #181818; font-size: 6rem; color: #1db954; border-radius: 1rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px 0 #1db95422;">
+          <i class="fas fa-user-circle"></i>
+        </div>
+      {% endif %}
+      <div style="flex: 1 1 300px;">
+        <h1 style="font-size: 2.5rem; color: #1db954; text-shadow: 0 2px 24px #1db95444, 0 1px 0 #181818; font-weight: 900; margin-bottom: 0.7rem;">
+          <i class="fas fa-user" style="margin-right: 0.5em; color: #1db954;"></i>{{ artist.name|default:"(No Name)" }}
+        </h1>
+        {% if artist.debut_date %}
+          <div style="color: #b3b3b3; margin-bottom: 0.7rem; font-size: 1.05rem;">
+            <i class="fas fa-star" style="margin-right: 0.4em; color: #ffe066;"></i>
+            <strong>Debut:</strong> <span style="color: #fff;">{{ artist.debut_date|date:"F j, Y" }}</span>
+          </div>
+        {% endif %}
+
+        {# Follow/Unfollow Button Section #}
+        {% if user.is_authenticated %}
+          {% if user in artist.followers.all %}
+            <form method="post" action="{% url 'music:unfollow_artist' artist.pk %}" style="display: inline;">
+              {% csrf_token %}
+              <button type="submit" style="background: #232323; color: #1db954; border: 2px solid #1db954; border-radius: 2em; padding: 0.5em 1.5em; font-size: 1.1rem; font-weight: 700; cursor: pointer; margin-bottom: 0.7em;">
+                <i class="fas fa-user-minus" style="margin-right: 0.7em;"></i>Unfollow
+              </button>
+            </form>
+          {% else %}
+            <form method="post" action="{% url 'music:follow_artist' artist.pk %}" style="display: inline;">
+              {% csrf_token %}
+              <button type="submit" style="background: #1db954; color: #fff; border: none; border-radius: 2em; padding: 0.5em 1.5em; font-size: 1.1rem; font-weight: 700; cursor: pointer; margin-bottom: 0.7em;">
+                <i class="fas fa-user-plus" style="margin-right: 0.7em;"></i>Follow
+              </button>
+            </form>
+          {% endif %}
+          <div style="color: #b3b3b3; font-size: 1.05rem; margin-top: 0.5em;">
+            <i class="fas fa-users" style="margin-right: 0.4em; color: #1db954;"></i>
+            <span style="color: #fff;">{{ artist.followers.count }}</span> follower{{ artist.followers.count|pluralize }}
+          </div>
+        {% else %}
+          <div style="color: #b3b3b3; font-size: 1.05rem;">
+            <i class="fas fa-users" style="margin-right: 0.4em; color: #1db954;"></i>
+            <span style="color: #fff;">{{ artist.followers.count }}</span> follower{{ artist.followers.count|pluralize }}
+          </div>
+          <div style="margin-top: 0.5em; color: #b3b3b3; font-size: 1.05rem;">
+            <i class="fas fa-sign-in-alt" style="margin-right: 0.4em; color: #1db954;"></i>
+            <a href="{% url 'login' %}" style="color: #1db954; text-decoration: underline;">Log in</a> to follow this artist.
+          </div>
+        {% endif %}
+
+        <div style="background: #181818; border-radius: 1rem; margin-top: 1.5rem; padding: 1.2rem 1.5rem; box-shadow: 0 1px 4px 0 #1db95422; max-width: 500px;">
+          <div style="color: #1db954; font-weight: 700; font-size: 1.15rem; margin-bottom: 0.5em;">
+            <i class="fas fa-info-circle" style="margin-right: 0.5em;"></i>Bio
+          </div>
+          {% if artist.bio %}
+            <div style="color: #fff;">{{ artist.bio|linebreaks }}</div>
+          {% else %}
+            <div style="color: #b3b3b3; font-style: italic;">No bio available for this artist.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <!-- COLLABORATIONS SECTION -->
+    <div style="margin-bottom: 3rem;">
+      <h2 style="color: #1db954; font-size: 2rem; letter-spacing: -1px; font-weight: 900; margin-bottom: 1.2rem;">
+        <i class="fas fa-users" style="margin-right: 0.5em;"></i>Collaborations
+      </h2>
+      {% with collaborations=artist.artist_collaborations.all %}
+        {% if collaborations %}
+          <ul style="list-style: none; padding: 0; margin: 0;">
+            {% for collaboration in collaborations %}
+              <li style="display: flex; align-items: flex-start; gap: 1.2em; background: #181818; border-radius: 1rem; margin-bottom: 1.1em; padding: 1.1em 1.3em; box-shadow: 0 1px 4px 0 #1db95422;">
+                <span style="color: #1db954; font-size: 1.5rem; margin-right: 0.7em;"><i class="fas fa-users"></i></span>
+                <div>
+                  <a href="{% url 'music:collaboration_detail' collaboration.pk %}" style="color: #fff; font-size: 1.13rem; font-weight: 600; text-decoration: none;">
+                    {% if collaboration.song %}
+                      {{ collaboration.song.title }}
+                    {% else %}
+                      Collaboration #{{ collaboration.pk }}
+                    {% endif %}
+                  </a>
+                  {% if collaboration.release_date %}
+                    <span style="color: #b3b3b3; font-size: 1rem; margin-left: 0.5em;">({{ collaboration.release_date|date:"Y" }})</span>
+                  {% endif %}
+                  {% if collaboration.description %}
+                    <div style="color: #b3b3b3; font-size: 0.98rem; margin-top: 0.3em;">{{ collaboration.description|truncatewords:18 }}</div>
+                  {% endif %}
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div style="background: #232323; color: #1db954; border: none; border-radius: 1.2rem; font-size: 1.15rem; font-weight: 600; box-shadow: 0 2px 8px 0 #1db95422; text-align: center; margin-top: 1.5rem; padding: 1.2rem;">
+            <i class="fas fa-info-circle" style="margin-right: 0.5em;"></i>No collaborations found for this artist.
+          </div>
+        {% endif %}
+      {% endwith %}
+    </div>
+    <!-- ALBUMS SECTION -->
+    <div style="margin-bottom: 3rem;">
+      <h2 style="color: #1db954; font-size: 2rem; letter-spacing: -1px; font-weight: 900; margin-bottom: 1.2rem;">
+        <i class="fas fa-compact-disc" style="margin-right: 0.5em;"></i>Albums
+      </h2>
+      {% with albums=artist.albums.all %}
+        {% if albums %}
+          <ul style="list-style: none; padding: 0; margin: 0;">
+            {% for album in albums %}
+              <li style="display: flex; align-items: center; gap: 1.2em; background: #181818; border-radius: 1rem; margin-bottom: 1.1em; padding: 1.1em 1.3em; box-shadow: 0 1px 4px 0 #1db95422;">
+                {% if album.cover %}
+                  <img src="{{ album.cover.url }}" alt="{{ album.title }} cover" style="height: 48px; width: 48px; object-fit: cover; background: #232323; border-radius: 0.5rem; margin-right: 1.2rem;">
+                {% else %}
+                  <span style="color: #b3b3b3; font-size:2.2rem; margin-right:1.2rem;">
+                    <i class="fas fa-compact-disc"></i>
+                  </span>
+                {% endif %}
+                <div>
+                  <a href="{% url 'music:album_detail' album.pk %}" style="color: #fff; font-size: 1.13rem; font-weight: 600; text-decoration: none;">
+                    {{ album.title }}
+                  </a>
+                  {% if album.release_date %}
+                    <span style="color: #b3b3b3; font-size: 1rem; margin-left: 0.5em;">({{ album.release_date|date:"Y" }})</span>
+                  {% endif %}
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div style="background: #232323; color: #1db954; border: none; border-radius: 1.2rem; font-size: 1.15rem; font-weight: 600; box-shadow: 0 2px 8px 0 #1db95422; text-align: center; margin-top: 1.5rem; padding: 1.2rem;">
+            <i class="fas fa-info-circle" style="margin-right: 0.5em;"></i>No albums found for this artist.
+          </div>
+        {% endif %}
+      {% endwith %}
+    </div>
+
+    <!-- SONGS SECTION -->
+    <div style="margin-bottom: 3rem;">
+      <h2 style="color: #1db954; font-size: 2rem; letter-spacing: -1px; font-weight: 900; margin-bottom: 1.2rem;">
+        <i class="fas fa-music" style="margin-right: 0.5em;"></i>Songs
+      </h2>
+      {% with songs=artist.songs.all %}
+        {% if songs %}
+          <ul style="list-style: none; padding: 0; margin: 0;">
+            {% for song in songs %}
+              <li style="display: flex; align-items: center; gap: 1.2em; background: #181818; border-radius: 1rem; margin-bottom: 1.1em; padding: 1.1em 1.3em; box-shadow: 0 1px 4px 0 #1db95422;">
+                <span style="color: #1db954; font-size: 1.5rem; margin-right: 0.7em;"><i class="fas fa-music"></i></span>
+                {% if song.image %}
+                  <img src="{{ song.image.url }}" alt="{{ song.title }} cover" style="height: 48px; width: 48px; object-fit: cover; background: #232323; border-radius: 0.5rem; margin-right: 1.2rem;">
+                {% else %}
+                  <span style="color: #b3b3b3; font-size:2.2rem; margin-right:1.2rem;">
+                    <i class="fas fa-compact-disc"></i>
+                  </span>
+                {% endif %}
+                <div>
+                  <a href="{% url 'music:song_detail' song.pk %}" style="color: #fff; font-size: 1.13rem; font-weight: 600; text-decoration: none;">
+                    {{ song.title }}
+                  </a>
+                  {% if song.album %}
+                    <span style="color: #b3b3b3; font-size: 1rem; margin-left: 0.5em;">
+                      (from <a href="{% url 'music:album_detail' song.album.pk %}" style="color: #1db954; text-decoration: underline;">{{ song.album.title }}</a>)
+                    </span>
+                  {% endif %}
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div style="background: #232323; color: #1db954; border: none; border-radius: 1.2rem; font-size: 1.15rem; font-weight: 600; box-shadow: 0 2px 8px 0 #1db95422; text-align: center; margin-top: 1.5rem; padding: 1.2rem;">
+            <i class="fas fa-info-circle" style="margin-right: 0.5em;"></i>No songs found for this artist.
+          </div>
+        {% endif %}
+      {% endwith %}
+    </div>
+  </div>
+</div>
+{% include 'inc/is_paginated.html' %}
+
+{% endblock %}

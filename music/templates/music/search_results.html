@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Search Results{% endblock %}
+
+{% block content %}
+
+{% if query %}
+  <div class="container my-5 spotify-search-results">
+    <div class="rounded-4 p-4 shadow-lg" style="background: linear-gradient(120deg, #191414 70%, #1db954 100%);">
+      <h3 class="mb-4 fw-bold" style="color: #fff;">
+        <i class="fas fa-search me-2" style="color: #1db954;"></i>
+        Search Results for "<span style="color: #1db954;">{{ query }}</span>"
+      </h3>
+
+      {% if not results.artists and not results.albums and not results.songs and not results.genres %}
+        <div class="alert alert-warning d-flex align-items-center rounded-3 border-0" style="background: #232323; color: #fff;">
+          <i class="fas fa-search me-2" style="color: #1db954;"></i> No results found.
+        </div>
+      {% endif %}
+
+      {% if results.songs %}
+        <h5 class="mt-4 mb-2 fw-semibold" style="color: #1db954;">
+          <i class="fas fa-music me-2"></i> Songs
+        </h5>
+        <ul class="list-group mb-3 border-0">
+          {% for song in results.songs %}
+            <li class="list-group-item d-flex justify-content-between align-items-center border-0 mb-1 rounded-3 spotify-result-item" style="background: #232323; color: #fff;">
+              <div class="d-flex align-items-center">
+                {% if song.image %}
+                  <img src="{{ song.image.url }}" alt="{{ song.title }} cover" class="me-3 rounded-3" style="width: 48px; height: 48px; object-fit: cover; background: #191414;">
+                {% else %}
+                  <div class="me-3 d-flex align-items-center justify-content-center rounded-3" style="width: 48px; height: 48px; background: #191414;">
+                    <i class="fas fa-music" style="color: #1db954; font-size: 1.5rem;"></i>
+                  </div>
+                {% endif %}
+                <div>
+                  <a href="{% url 'music:song_detail' song.pk %}" class="fw-semibold" style="color: #1db954; text-decoration: none;">
+                    {{ song.title }}
+                  </a>
+                  {% if song.artist %}
+                    <span class="ms-2 badge rounded-pill" style="background: #1db954; color: #191414; font-weight: 600;">
+                      {{ song.artist.name }}
+                    </span>
+                  {% endif %}
+                </div>
+              </div>
+              <a href="{% url 'music:song_detail' song.pk %}" class="btn btn-outline-success btn-sm rounded-pill px-3" style="border-color: #1db954; color: #1db954;">
+                <i class="fas fa-play"></i>
+              </a>
+            </li>
+          {% empty %}
+            <li class="list-group-item border-0 mb-1 rounded-3" style="background: #232323; color: #fff;">
+              No songs found.
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      {% if results.albums %}
+        <h5 class="mt-4 mb-2 fw-semibold" style="color: #1db954;">
+          <i class="fas fa-compact-disc me-2"></i> Albums
+        </h5>
+        <ul class="list-group mb-3 border-0">
+          {% for album in results.albums %}
+            <li class="list-group-item d-flex justify-content-between align-items-center border-0 mb-1 rounded-3 spotify-result-item" style="background: #232323; color: #fff;">
+              <div class="d-flex align-items-center">
+                {% if album.image %}
+                  <img src="{{ album.image.url }}" alt="{{ album.title }} cover" class="me-3 rounded-3" style="width: 48px; height: 48px; object-fit: cover; background: #191414;">
+                {% else %}
+                  <div class="me-3 d-flex align-items-center justify-content-center rounded-3" style="width: 48px; height: 48px; background: #191414;">
+                    <i class="fas fa-compact-disc" style="color: #1db954; font-size: 1.5rem;"></i>
+                  </div>
+                {% endif %}
+                <div>
+                  <a href="{% url 'music:album_detail' album.pk %}" class="fw-semibold" style="color: #1db954; text-decoration: none;">
+                    {{ album.title }}
+                  </a>
+                  {% if album.artist %}
+                    <span class="ms-2 badge rounded-pill" style="background: #1db954; color: #191414; font-weight: 600;">
+                      {{ album.artist.name }}
+                    </span>
+                  {% endif %}
+                </div>
+              </div>
+              <a href="{% url 'music:album_detail' album.pk %}" class="btn btn-outline-success btn-sm rounded-pill px-3" style="border-color: #1db954; color: #1db954;">
+                <i class="fas fa-arrow-right"></i>
+              </a>
+            </li>
+          {% empty %}
+            <li class="list-group-item border-0 mb-1 rounded-3" style="background: #232323; color: #fff;">
+              No albums found.
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      {% if results.artists %}
+        <h5 class="mt-4 mb-2 fw-semibold" style="color: #1db954;">
+          <i class="fas fa-users me-2"></i> Artists
+        </h5>
+        <ul class="list-group mb-3 border-0">
+          {% for artist in results.artists %}
+            <li class="list-group-item border-0 mb-1 rounded-3 spotify-result-item d-flex align-items-center" style="background: #232323; color: #fff;">
+              {% if artist.image %}
+                <img src="{{ artist.image.url }}" alt="{{ artist.name }} photo" class="me-3 rounded-circle" style="width: 48px; height: 48px; object-fit: cover; background: #191414;">
+              {% else %}
+                <div class="me-3 d-flex align-items-center justify-content-center rounded-circle" style="width: 48px; height: 48px; background: #191414;">
+                  <i class="fas fa-user-circle" style="color: #1db954; font-size: 1.5rem;"></i>
+                </div>
+              {% endif %}
+              <a href="{% url 'music:artist_detail' artist.pk %}" class="fw-semibold" style="color: #1db954; text-decoration: none;">
+                {{ artist.name }}
+              </a>
+            </li>
+          {% empty %}
+            <li class="list-group-item border-0 mb-1 rounded-3" style="background: #232323; color: #fff;">
+              No artists found.
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      {% if results.genres %}
+        <h5 class="mt-4 mb-2 fw-semibold" style="color: #1db954;">
+          <i class="fas fa-tags me-2"></i> Genres
+        </h5>
+        <ul class="list-group mb-3 border-0">
+          {% for genre in results.genres %}
+            <li class="list-group-item border-0 mb-1 rounded-3 spotify-result-item d-flex align-items-center" style="background: #232323; color: #fff;">
+              {% if genre.image %}
+                <img src="{{ genre.image.url }}" alt="{{ genre.name }} image" class="me-3 rounded-3" style="width: 48px; height: 48px; object-fit: cover; background: #191414;">
+              {% else %}
+                <div class="me-3 d-flex align-items-center justify-content-center rounded-3" style="width: 48px; height: 48px; background: #191414;">
+                  <i class="fas fa-tag" style="color: #1db954; font-size: 1.5rem;"></i>
+                </div>
+              {% endif %}
+              <a href="{% url 'music:genre_detail' genre.pk %}" class="fw-semibold" style="color: #1db954; text-decoration: none;">
+                {{ genre.name }}
+              </a>
+            </li>
+          {% empty %}
+            <li class="list-group-item border-0 mb-1 rounded-3" style="background: #232323; color: #fff;">
+              No genres found.
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+  </div>
+  <style>
+    .spotify-search-results .spotify-result-item:hover {
+      background: linear-gradient(90deg, #1db95433 0%, #232323 100%);
+      box-shadow: 0 2px 8px 0 #1db95433;
+      transition: background 0.18s, box-shadow 0.18s;
+    }
+    .spotify-search-results .list-group-item {
+      transition: background 0.18s, box-shadow 0.18s;
+    }
+    .spotify-search-results .btn-outline-success:hover,
+    .spotify-search-results .btn-outline-success:focus {
+      background: #1db954;
+      color: #191414;
+      border-color: #1db954;
+      box-shadow: 0 2px 8px 0 #1db95433;
+    }
+  </style>
+{% endif %}
+{% endblock %} 
+

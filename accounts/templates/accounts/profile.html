@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 3rem auto; background: #232323; color: #fff; border-radius: 1.5rem; box-shadow: 0 4px 24px 0 #1db95422, 0 2px 8px #00000022;">
+  <div style="padding: 2.5rem 2rem;">
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <i class="fas fa-user-circle" style="font-size: 5rem; color: #1db954;"></i>
+      <h2 style="font-weight: 900; margin-top: 1.2rem; margin-bottom: 0.5rem;">{{ user.username }}</h2>
+      <p style="color: #b3b3b3; margin-bottom: 0; font-size: 1.1rem;">{{ user.email }}</p>
+    </div>
+    <hr style="border-color: #1db95433;">
+    <div style="margin-bottom: 2rem;">
+      <h5 style="color: #1db954; margin-bottom: 0.7rem;"><i class="fas fa-user-tag" style="margin-right: 0.5rem;"></i>Account Info</h5>
+      <ul style="list-style: none; padding: 0; margin-bottom: 0;">
+        <li><strong>Username:</strong> {{ user.username }}</li>
+        <li><strong>Email:</strong> {{ user.email }}</li>
+        <li><strong>Date Joined:</strong> {{ user.date_joined|date:"F j, Y" }}</li>
+        <li><strong>Last Login:</strong> {{ user.last_login|date:"F j, Y, g:i a" }}</li>
+      </ul>
+    </div>
+    <hr style="border-color: #1db95433;">
+    <div style="margin-bottom: 2rem;">
+      <h5 style="color: #1db954; margin-bottom: 0.7rem;"><i class="fas fa-music" style="margin-right: 0.5rem;"></i>Your Playlists</h5>
+      {% if user.playlists.exists %}
+        <ul style="list-style: none; padding: 0; margin-bottom: 0.7rem;">
+          {% for playlist in user.playlists.all %}
+            <li style="display: flex; justify-content: space-between; align-items: center; background: #232323; color: #fff; border: none; padding: 0.5rem 0;">
+              <span>
+                <i class="fas fa-list-ul" style="color: #1db954; margin-right: 0.5rem;"></i>
+                {{ playlist.title }}
+              </span>
+              <a href="{% url 'music:playlist_detail' playlist.pk %}" style="padding: 0.3em 1em; border: 1.5px solid #1db954; color: #1db954; background: transparent; border-radius: 1rem; font-size: 0.95em; text-decoration: none; font-weight: 600; transition: background 0.15s;">
+                View
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div style="color: #b3b3b3;">You have no playlists yet.</div>
+      {% endif %}
+      <a href="{% url 'music:playlist_create' %}" style="display: inline-block; margin-top: 0.7rem; background: #1db954; color: #fff; border: none; border-radius: 1rem; padding: 0.4em 1.2em; font-size: 0.95em; font-weight: 700; text-decoration: none;">
+        <i class="fas fa-plus" style="margin-right: 0.4em;"></i>Create Playlist
+      </a>
+    </div>
+    <hr style="border-color: #1db95433;">
+    <div style="margin-bottom: 2rem;">
+      <h5 style="color: #1db954; margin-bottom: 0.7rem;"><i class="fas fa-users" style="margin-right: 0.5rem;"></i>Followed Artists</h5>
+      {# Use user.following.all to get followed artists, since Artist.followers uses related_name='following' #}
+      {% if user.following.exists %}
+        <ul style="list-style: none; padding: 0; margin-bottom: 0.7rem;">
+          {% for artist in user.following.all|slice:":5" %}
+            <li style="display: flex; justify-content: space-between; align-items: center; background: #232323; color: #fff; border: none; padding: 0.5rem 0;">
+              <span style="display: flex; align-items: center;">
+                {% if artist.image %}
+                  <img src="{{ artist.image.url }}" alt="{{ artist.name }}" style="width: 32px; height: 32px; object-fit: cover; border-radius: 50%; margin-right: 0.5rem;">
+                {% else %}
+                  <span style="color: #1db954; margin-right: 0.5rem;"><i class="fas fa-user-circle"></i></span>
+                {% endif %}
+                {{ artist.name }}
+                {% if artist.is_verified %}
+                  <span title="Verified Artist" style="color:#1db954; margin-left: 0.4em;"><i class="fas fa-check-circle"></i></span>
+                {% endif %}
+              </span>
+              <a href="{% url 'music:artist_detail' artist.pk %}" style="padding: 0.3em 1em; border: 1.5px solid #1db954; color: #1db954; background: transparent; border-radius: 1rem; font-size: 0.95em; text-decoration: none; font-weight: 600; transition: background 0.15s;">
+                View
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+        {% if user.following.count > 5 %}
+          <div style="color: #b3b3b3; font-size: 0.95em;">
+            And {{ user.following.count|add:"-5" }} more...
+            <a href="{% url 'accounts:followed_artists' user.pk %}" style="margin-left: 0.5em; color: #1db954; text-decoration: underline;">See all</a>
+          </div>
+        {% endif %}
+      {% else %}
+        <div style="color: #b3b3b3;">You are not following any artists yet.</div>
+      {% endif %}
+    </div>
+    <hr style="border-color: #1db95433;">
+    <div style="margin-bottom: 2rem;">
+      <h5 style="color: #1db954; margin-bottom: 0.7rem;"><i class="fas fa-heart" style="margin-right: 0.5rem;"></i>Liked Songs</h5>
+      {% if user.song_likes.exists %}
+        <ul style="list-style: none; padding: 0; margin-bottom: 0.7rem;">
+          {% for like in user.song_likes.all|slice:":5" %}
+            <li style="display: flex; justify-content: space-between; align-items: center; background: #232323; color: #fff; border: none; padding: 0.5rem 0;">
+              <span>
+                <i class="fas fa-music" style="color: #1db954; margin-right: 0.5rem;"></i>
+                {{ like.song.title }}
+              </span>
+              <a href="{% url 'music:song_detail' like.song.pk %}" style="padding: 0.3em 1em; border: 1.5px solid #1db954; color: #1db954; background: transparent; border-radius: 1rem; font-size: 0.95em; text-decoration: none; font-weight: 600; transition: background 0.15s;">
+                View
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+        {% if user.song_likes.count > 5 %}
+          <div style="color: #b3b3b3; font-size: 0.95em;">
+            And {{ user.song_likes.count|add:"-5" }} more...
+            <a href="{% url 'accounts:liked_songs' user.pk %}" style="margin-left: 0.5em; color: #1db954; text-decoration: underline;">See all</a>
+          </div>
+        {% endif %}
+      {% else %}
+        <div style="color: #b3b3b3;">You haven't liked any songs yet.</div>
+      {% endif %}
+    </div>
+    <hr style="border-color: #1db95433;">
+    <div>
+      <a href="{% url 'accounts:logout' %}" style="display: block; width: 100%; text-align: center; background: transparent; color: #ff4d4f; border: 1.5px solid #ff4d4f; border-radius: 1rem; padding: 0.7em 0; font-size: 1.1rem; font-weight: 700; text-decoration: none; transition: background 0.15s;">
+        <i class="fas fa-sign-out-alt" style="margin-right: 0.5em;"></i>Logout
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

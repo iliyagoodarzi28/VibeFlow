@@ -1,0 +1,375 @@
+{% extends "base.html" %}
+{% block title %}{{ site_info.name }}{% endblock %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5 spotify-bg">
+  {% if site_info %}
+    <div class="mb-5 text-center">
+      <h1 class="display-4 fw-bold spotify-green-text">{{ site_info.site_name }}</h1>
+      {% if site_info.tagline %}
+        <p class="lead spotify-muted-text">{{ site_info.tagline }}</p>
+      {% endif %}
+      {% if site_info.description %}
+        <p class="mt-3 spotify-muted-text">{{ site_info.description }}</p>
+      {% endif %}
+    </div>
+  {% endif %}
+  {% if site_info.image_header %}
+    <div class="mb-4 text-center">
+      <img src="{{ site_info.image_header.url }}" alt="Header Image" class="img-fluid rounded shadow-sm spotify-header-img">
+    </div>
+  {% endif %}
+
+  <!-- Latest Songs -->
+  <div class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="fw-bold spotify-white-text">
+        <i class="fas fa-music me-2 spotify-green-text"></i>Latest Songs
+      </h2>
+      <a href="{% url 'music:song_list' %}" class="btn btn-outline-success spotify-btn">View All</a>
+    </div>
+    {% if latest_songs %}
+      <div class="row row-cols-1 row-cols-md-3 row-cols-lg-6 g-4">
+        {% for song in latest_songs %}
+          <div class="col">
+            <div class="card h-100 shadow-sm border-0 spotify-card">
+              {% if song.image %}
+                <img src="{{ song.image.url }}" class="card-img-top spotify-card-img" alt="{{ song.title }} cover">
+              {% else %}
+                <div class="d-flex align-items-center justify-content-center spotify-card-img spotify-green-text">
+                  <i class="fas fa-music"></i>
+                </div>
+              {% endif %}
+              <div class="card-body px-3 py-2">
+                <h5 class="card-title mb-1 spotify-white-text fw-bold">
+                  <a href="{% url 'music:song_detail' song.pk %}" class="text-decoration-none spotify-white-text">{{ song.title }}</a>
+                </h5>
+                {% if song.artist %}
+                  <div>
+                    <a href="{% url 'music:artist_detail' song.artist.pk %}" class="spotify-green-text text-decoration-none fw-semibold">
+                      <i class="fas fa-user me-1"></i>{{ song.artist.name }}
+                    </a>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="alert alert-info mt-3">No songs found.</div>
+    {% endif %}
+  </div>
+
+  <!-- Latest Albums -->
+  <div class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="fw-bold spotify-white-text">
+        <i class="fas fa-compact-disc me-2" style="color: #ffc107;"></i>Latest Albums
+      </h2>
+      <a href="{% url 'music:album_list' %}" class="btn btn-outline-warning spotify-btn">View All</a>
+    </div>
+    {% if latest_albums %}
+      <div class="row row-cols-1 row-cols-md-3 row-cols-lg-6 g-4">
+        {% for album in latest_albums %}
+          <div class="col">
+            <div class="card h-100 shadow-sm border-0 spotify-card">
+              {% if album.cover %}
+                <img src="{{ album.cover.url }}" class="card-img-top spotify-card-img" alt="{{ album.title }} cover">
+              {% else %}
+                <div class="d-flex align-items-center justify-content-center spotify-card-img" style="color: #ffc107;">
+                  <i class="fas fa-compact-disc"></i>
+                </div>
+              {% endif %}
+              <div class="card-body px-3 py-2">
+                <h5 class="card-title mb-1 spotify-white-text fw-bold">
+                  <a href="{% url 'music:album_detail' album.pk %}" class="text-decoration-none spotify-white-text">{{ album.title }}</a>
+                </h5>
+                {% if album.artist %}
+                  <div>
+                    <a href="{% url 'music:artist_detail' album.artist.pk %}" class="spotify-green-text text-decoration-none fw-semibold">
+                      <i class="fas fa-user me-1"></i>{{ album.artist.name }}
+                    </a>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="alert alert-info mt-3">No albums found.</div>
+    {% endif %}
+  </div>
+
+  <!-- Featured Artists -->
+  <div class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="fw-bold spotify-white-text">
+        <i class="fas fa-star me-2" style="color: #f1c40f;"></i>Featured Artists
+      </h2>
+      <a href="{% url 'music:artist_list' %}" class="btn btn-outline-primary spotify-btn">View All</a>
+    </div>
+    {% if featured_artists %}
+      <div class="row row-cols-1 row-cols-md-3 row-cols-lg-6 g-4">
+        {% for artist in featured_artists %}
+          {% if artist.is_verified %}
+            <div class="col">
+              <div class="card h-100 shadow-sm border-0 text-center spotify-card">
+                {% if artist.image %}
+                  <img src="{{ artist.image.url }}" class="rounded-circle mx-auto mt-3 spotify-artist-img" alt="{{ artist.name }}">
+                {% else %}
+                  <div class="d-flex align-items-center justify-content-center rounded-circle mx-auto mt-3 spotify-artist-img spotify-green-text">
+                    <i class="fas fa-user"></i>
+                  </div>
+                {% endif %}
+                <div class="card-body px-2 py-2">
+                  <h5 class="card-title mb-1 spotify-white-text fw-bold">
+                    <a href="{% url 'music:artist_detail' artist.pk %}" class="text-decoration-none spotify-white-text">{{ artist.name }}</a>
+                  </h5>
+                  {% if artist.genre %}
+                    <div class="text-muted small">{{ artist.genre.name }}</div>
+                  {% endif %}
+                  <span class="badge bg-success mt-1">Verified</span>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+      {% if not featured_artists|length or not featured_artists|yesno:"1,0"|add:"" %}
+        <div class="alert alert-info mt-3">No featured artists found.</div>
+      {% endif %}
+    {% else %}
+      <div class="alert alert-info mt-3">No featured artists found.</div>
+    {% endif %}
+  </div>
+
+  <!-- Followed Artists (if authenticated) -->
+  {% if user.is_authenticated and followed_artists %}
+    <div class="mb-5">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold spotify-white-text">
+          <i class="fas fa-user-friends me-2 spotify-green-text"></i>Artists You Follow
+        </h2>
+      </div>
+      <div class="row row-cols-1 row-cols-md-3 row-cols-lg-6 g-4">
+        {% for artist in followed_artists %}
+          <div class="col">
+            <div class="card h-100 shadow-sm border-0 text-center spotify-card">
+              {% if artist.image %}
+                <img src="{{ artist.image.url }}" class="rounded-circle mx-auto mt-3 spotify-artist-img" alt="{{ artist.name }}">
+              {% else %}
+                <div class="d-flex align-items-center justify-content-center rounded-circle mx-auto mt-3 spotify-artist-img spotify-green-text">
+                  <i class="fas fa-user"></i>
+                </div>
+              {% endif %}
+              <div class="card-body px-2 py-2">
+                <h5 class="card-title mb-1 spotify-white-text fw-bold">
+                  <a href="{% url 'music:artist_detail' artist.pk %}" class="text-decoration-none spotify-white-text">{{ artist.name }}</a>
+                </h5>
+                {% if artist.genre %}
+                  <div class="text-muted small">{{ artist.genre.name }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Liked Songs (if authenticated) -->
+  {% if user.is_authenticated and liked_songs %}
+    <div class="mb-5">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold spotify-white-text">
+          <i class="fas fa-heart me-2" style="color: #e74c3c;"></i>Your Liked Songs
+        </h2>
+        <a href="{% url 'accounts:liked_songs' user.username %}" class="btn btn-outline-danger spotify-btn">View All</a>
+      </div>
+      <div class="row row-cols-1 row-cols-md-3 row-cols-lg-6 g-4">
+        {% for song in liked_songs %}
+          <div class="col">
+            <div class="card h-100 shadow-sm border-0 spotify-card">
+              {% if song.image %}
+                <img src="{{ song.image.url }}" class="card-img-top spotify-card-img-sm" alt="{{ song.title }} cover">
+              {% else %}
+                <div class="d-flex align-items-center justify-content-center spotify-card-img-sm" style="color: #e74c3c;">
+                  <i class="fas fa-music"></i>
+                </div>
+              {% endif %}
+              <div class="card-body px-3 py-2">
+                <h6 class="card-title mb-1 spotify-white-text fw-bold">
+                  <a href="{% url 'music:song_detail' song.pk %}" class="text-decoration-none spotify-white-text">{{ song.title }}</a>
+                </h6>
+                {% if song.artist %}
+                  <div>
+                    <a href="{% url 'music:artist_detail' song.artist.pk %}" class="spotify-green-text text-decoration-none fw-semibold">
+                      <i class="fas fa-user me-1"></i>{{ song.artist.name }}
+                    </a>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Recently Played (if authenticated) -->
+  {% if user.is_authenticated and recently_played %}
+    <div class="mb-5">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold spotify-white-text">
+          <i class="fas fa-history me-2" style="color: #6c757d;"></i>Recently Played
+        </h2>
+      </div>
+      <div class="row row-cols-1 row-cols-md-3 row-cols-lg-6 g-4">
+        {% for song in recently_played %}
+          <div class="col">
+            <div class="card h-100 shadow-sm border-0 spotify-card">
+              {% if song.image %}
+                <img src="{{ song.image.url }}" class="card-img-top spotify-card-img-sm" alt="{{ song.title }} cover">
+              {% else %}
+                <div class="d-flex align-items-center justify-content-center spotify-card-img-sm" style="color: #6c757d;">
+                  <i class="fas fa-music"></i>
+                </div>
+              {% endif %}
+              <div class="card-body px-3 py-2">
+                <h6 class="card-title mb-1 spotify-white-text fw-bold">
+                  <a href="{% url 'music:song_detail' song.pk %}" class="text-decoration-none spotify-white-text">{{ song.title }}</a>
+                </h6>
+                {% if song.artist %}
+                  <div>
+                    <a href="{% url 'music:artist_detail' song.artist.pk %}" class="spotify-green-text text-decoration-none fw-semibold">
+                      <i class="fas fa-user me-1"></i>{{ song.artist.name }}
+                    </a>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Random Song Suggestions -->
+  <div class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="fw-bold spotify-white-text">
+        <i class="fas fa-random me-2 spotify-green-text"></i>Discover New Songs
+      </h2>
+    </div>
+    {% if random_songs %}
+      <div class="row row-cols-1 row-cols-md-3 row-cols-lg-6 g-4">
+        {% for song in random_songs %}
+          <div class="col">
+            <div class="card h-100 shadow-sm border-0 spotify-card">
+              {% if song.image %}
+                <img src="{{ song.image.url }}" class="card-img-top spotify-card-img-sm" alt="{{ song.title }} cover">
+              {% else %}
+                <div class="d-flex align-items-center justify-content-center spotify-card-img-sm spotify-green-text">
+                  <i class="fas fa-music"></i>
+                </div>
+              {% endif %}
+              <div class="card-body px-3 py-2">
+                <h6 class="card-title mb-1 spotify-white-text fw-bold">
+                  <a href="{% url 'music:song_detail' song.pk %}" class="text-decoration-none spotify-white-text">{{ song.title }}</a>
+                </h6>
+                {% if song.artist %}
+                  <div>
+                    <a href="{% url 'music:artist_detail' song.artist.pk %}" class="spotify-green-text text-decoration-none fw-semibold">
+                      <i class="fas fa-user me-1"></i>{{ song.artist.name }}
+                    </a>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="alert alert-info mt-3">No song suggestions available.</div>
+    {% endif %}
+  </div>
+
+  <!-- Most Viewed Songs -->
+  <div class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="fw-bold spotify-white-text">
+        <i class="fas fa-fire me-2" style="color: #e67e22;"></i>Most Viewed Songs
+      </h2>
+    </div>
+    {% if most_viewed_songs %}
+      <div class="row row-cols-1 row-cols-md-3 row-cols-lg-6 g-4">
+        {% for song in most_viewed_songs %}
+          <div class="col">
+            <div class="card h-100 shadow-sm border-0 spotify-card">
+              {% if song.image %}
+                <img src="{{ song.image.url }}" class="card-img-top spotify-card-img-sm" alt="{{ song.title }} cover">
+              {% else %}
+                <div class="d-flex align-items-center justify-content-center spotify-card-img-sm" style="color: #e67e22;">
+                  <i class="fas fa-music"></i>
+                </div>
+              {% endif %}
+              <div class="card-body px-3 py-2">
+                <h6 class="card-title mb-1 spotify-white-text fw-bold">
+                  <a href="{% url 'music:song_detail' song.pk %}" class="text-decoration-none spotify-white-text">{{ song.title }}</a>
+                </h6>
+                {% if song.artist %}
+                  <div>
+                    <a href="{% url 'music:artist_detail' song.artist.pk %}" class="spotify-green-text text-decoration-none fw-semibold">
+                      <i class="fas fa-user me-1"></i>{{ song.artist.name }}
+                    </a>
+                  </div>
+                {% endif %}
+                <div class="text-muted small mt-1">
+                  <i class="fas fa-eye me-1"></i>{{ song.views_count|default:0 }} views
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="alert alert-info mt-3">No view data available.</div>
+    {% endif %}
+  </div>
+</div>
+<!-- Liked Songs Section (Home Page Preview) -->
+{% if user.is_authenticated and liked_songs %}
+  <div class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="fw-bold spotify-white-text">
+        <i class="fas fa-heart me-2 spotify-green-text"></i>Your Liked Songs
+      </h2>
+      <a href="{% url 'accounts:liked_songs' user.username %}" class="btn btn-outline-success spotify-btn">View All</a>
+    </div>
+    <ul class="list-unstyled mb-4">
+      {% for like in liked_songs|slice:":6" %}
+        <li class="d-flex justify-content-between align-items-center spotify-list-item">
+          <span>
+            <i class="fas fa-music spotify-green-text me-2"></i>
+            {{ like.song.title }}
+            {% if like.song.artist %}
+              <span class="spotify-muted-text ms-2" style="font-size: 0.95em;">by {{ like.song.artist.name }}</span>
+            {% endif %}
+          </span>
+          <a href="{% url 'music:song_detail' like.song.pk %}" class="spotify-list-btn">
+            View
+          </a>
+        </li>
+      {% empty %}
+        <li class="spotify-list-item text-center">
+          <div class="spotify-muted-text">No liked songs found.</div>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}
+
+{% endblock %}

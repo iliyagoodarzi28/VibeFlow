@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}{{ genre.name }} - Genre Details{% endblock %}
+
+{% block content %}
+
+<div style="background: #000; min-height: 100vh; padding: 3rem 0;">
+  <div class="container spotify-genre-container">
+    <div class="row mb-4 text-center">
+      <div class="col">
+        <h1 class="spotify-genre-header" style="color: #1db954;">
+          <i class="fas fa-tag me-2"></i>{{ genre.name }}
+        </h1>
+        {% if genre.description %}
+          <p class="spotify-genre-description" style="color: #b3b3b3;">{{ genre.description }}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Artists Section -->
+    <div class="row mb-5">
+      <div class="col">
+        <div class="spotify-section-title mb-3" style="color: #1db954;">
+          <i class="fas fa-users"></i> Artists in this genre
+        </div>
+        {% with artists=genre.artist_set.all %}
+          {% if artists %}
+            <div class="row g-4">
+              {% for artist in artists %}
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                  <div class="card h-100 spotify-artist-card" style="background: #181818; border: none;">
+                    <div class="card-body d-flex flex-column align-items-center pt-4">
+                      {% if artist.image %}
+                        <img src="{{ artist.image.url }}" class="spotify-artist-img mb-3 rounded-circle" alt="{{ artist.name }} image" style="width: 100px; height: 100px; object-fit: cover;">
+                      {% else %}
+                        <div class="spotify-artist-img-placeholder mb-3" style="font-size: 4rem; color: #232323;">
+                          <i class="fas fa-user-circle"></i>
+                        </div>
+                      {% endif %}
+                      <h4 class="spotify-artist-title mb-2 text-center">
+                        <a href="{% url 'music:artist_detail' artist.pk %}" class="spotify-artist-link text-decoration-none" style="color: #fff;">
+                          <i class="fas fa-user me-2"></i>{{ artist.name }}
+                        </a>
+                      </h4>
+                      {% if artist.bio %}
+                        <p class="spotify-artist-bio text-center" style="color: #b3b3b3;">{{ artist.bio|truncatewords:20 }}</p>
+                      {% else %}
+                        <p class="spotify-artist-bio text-center" style="color: #b3b3b3;"><em>No bio available.</em></p>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="alert alert-info mt-4 text-center spotify-empty-alert" style="background: #181818; color: #1db954; border: none;">
+              <i class="fas fa-info-circle me-2"></i>No artists found for this genre.
+            </div>
+          {% endif %}
+        {% endwith %}
+      </div>
+    </div>
+
+    <!-- Albums Section -->
+    <div class="row mb-5">
+      <div class="col">
+        <div class="spotify-section-title mb-3" style="color: #1db954;">
+          <i class="fas fa-compact-disc"></i> Albums in this genre
+        </div>
+        {% with albums=genre.albums.all %}
+          {% if albums %}
+            <div class="row g-4">
+              {% for album in albums %}
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                  <div class="card h-100 spotify-album-card" style="background: #181818; border: none;">
+                    {% if album.cover %}
+                      <img src="{{ album.cover.url }}" class="card-img-top spotify-album-img" alt="{{ album.title }} cover" style="object-fit: cover; height: 180px;">
+                    {% else %}
+                      <div class="spotify-album-img-placeholder d-flex align-items-center justify-content-center" style="height: 180px; background: #232323; font-size: 3rem; color: #232323;">
+                        <i class="fas fa-compact-disc"></i>
+                      </div>
+                    {% endif %}
+                    <div class="card-body d-flex flex-column">
+                      <h4 class="spotify-album-title mb-2">
+                        <a href="{% url 'music:album_detail' album.pk %}" class="spotify-album-link text-decoration-none" style="color: #fff;">{{ album.title }}</a>
+                      </h4>
+                      <div class="spotify-album-artist mb-2">
+                        <a href="{% url 'music:artist_detail' album.artist.pk %}" class="spotify-artist-link text-decoration-none" style="color: #1db954;">
+                          <i class="fas fa-user me-1"></i>{{ album.artist.name }}
+                        </a>
+                      </div>
+                      {% if album.release_date %}
+                        <div class="spotify-album-release text-muted" style="color: #b3b3b3 !important;">
+                          <i class="fas fa-calendar-alt me-1"></i>{{ album.release_date|date:"Y" }}
+                        </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="alert alert-info mt-4 text-center spotify-empty-alert" style="background: #181818; color: #1db954; border: none;">
+              <i class="fas fa-info-circle me-2"></i>No albums found for this genre.
+            </div>
+          {% endif %}
+        {% endwith %}
+      </div>
+    </div>
+
+    <!-- Songs Section -->
+    <div class="row mb-5">
+      <div class="col">
+        <div class="spotify-section-title mb-3" style="color: #1db954;">
+          <i class="fas fa-music"></i> Songs in this genre
+        </div>
+        {% with songs=genre.songs.all %}
+          {% if songs %}
+            <div class="list-group">
+              {% for song in songs %}
+                <div class="list-group-item d-flex align-items-center spotify-song-item" style="background: #181818; color: #fff; border: none;">
+                  {% if song.image %}
+                    <img src="{{ song.image.url }}" alt="{{ song.title }} image" class="spotify-song-artwork rounded me-3" style="width: 48px; height: 48px; object-fit: cover;">
+                  {% else %}
+                    <div class="spotify-song-artwork-placeholder d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; background: #232323; font-size: 2rem; color: #232323;">
+                      <i class="fas fa-music"></i>
+                    </div>
+                  {% endif %}
+                  <div class="spotify-song-info flex-grow-1">
+                    <a href="{% url 'music:song_detail' song.pk %}" class="spotify-song-title text-decoration-none fw-bold" style="color: #fff;">{{ song.title }}</a>
+                    <span class="spotify-song-by text-muted mx-2" style="color: #b3b3b3 !important;">by</span>
+                    <a href="{% url 'music:artist_detail' song.artist.pk %}" class="spotify-song-artist text-decoration-none" style="color: #1db954;">{{ song.artist.name }}</a>
+                    {% if song.album %}
+                      <span class="spotify-song-album ms-3 text-muted fst-italic" style="font-size: 0.98rem; color: #b3b3b3 !important;">
+                        (from <a href="{% url 'music:album_detail' song.album.pk %}" class="spotify-song-album-link text-decoration-none" style="color: #1db954;">{{ song.album.title }}</a>)
+                      </span>
+                    {% endif %}
+                  </div>
+                  {% if song.duration %}
+                    <span class="spotify-song-duration ms-3 text-nowrap text-muted" style="color: #b3b3b3 !important;">
+                      {{ song.duration|time:"i:s" }}
+                    </span>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="alert alert-info mt-4 text-center spotify-empty-alert" style="background: #181818; color: #1db954; border: none;">
+              <i class="fas fa-info-circle me-2"></i>No songs found for this genre.
+            </div>
+          {% endif %}
+        {% endwith %}
+      </div>
+    </div>
+  </div>
+</div>  
+
+{% endblock %}

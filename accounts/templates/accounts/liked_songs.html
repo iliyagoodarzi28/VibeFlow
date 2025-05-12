@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Liked Songs{% endblock %}
+
+{% block content %}
+<div style="padding: 3rem 0;">
+  <div style="max-width: 700px; margin: 0 auto;">
+    <div style="border-radius: 1.5rem; background: #232323; color: #fff; box-shadow: 0 4px 24px 0 #1db95422, 0 2px 8px #00000022;">
+      <div style="padding: 3rem;">
+        <div style="margin-bottom: 2rem; text-align: center;">
+          <h2 style="font-weight: 900; margin-bottom: 0.5rem;">
+            <i class="fas fa-heart" style="color: #1db954; margin-right: 0.7em;"></i>
+            Liked Songs
+          </h2>
+          <p style="color: #b3b3b3; font-size: 1.1rem; margin-bottom: 0;">
+            Songs liked by {{ profile_user.username }}
+          </p>
+        </div>
+        <hr style="border: none; border-top: 1px solid #1db95433; margin-bottom: 2rem;">
+        {% if liked_songs %}
+          <ul style="list-style: none; padding: 0; margin-bottom: 2rem;">
+            {% for like in liked_songs %}
+              <li style="display: flex; justify-content: space-between; align-items: center; background: #232323; color: #fff; border: none; padding: 1rem 0; border-bottom: 1px solid #1db95422;">
+                <span>
+                  <i class="fas fa-music" style="color: #1db954; margin-right: 0.7em;"></i>
+                  {{ like.song.title }}
+                  {% if like.song.artist %}
+                    <span style="color: #b3b3b3; font-size: 0.95em; margin-left: 0.7em;">by {{ like.song.artist.name }}</span>
+                  {% endif %}
+                </span>
+                <a href="{% url 'music:song_detail' like.song.pk %}" style="display: inline-block; background: transparent; color: #1db954; border: 1.5px solid #1db954; border-radius: 1rem; padding: 0.3em 1em; font-size: 0.98rem; font-weight: 600; text-decoration: none; transition: background 0.15s, color 0.15s;">
+                  View
+                </a>
+              </li>
+            {% empty %}
+              <li style="background: #232323; color: #fff; border: none; padding: 1.2rem 0; text-align: center;">
+                <div style="color: #b3b3b3;">No liked songs found.</div>
+              </li>
+            {% endfor %}
+          </ul>
+          {% include 'inc/is_paginated.html' %}
+        {% else %}
+          <div style="background: #232323; color: #1db954; border: none; border-radius: 1.2rem; font-size: 1.15rem; font-weight: 600; box-shadow: 0 2px 8px 0 #1db95422; margin-top: 2rem; text-align: center; padding: 2.5rem 1rem;">
+            <i class="fa fa-info-circle" style="margin-right: 0.7em;"></i> No liked songs found.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
